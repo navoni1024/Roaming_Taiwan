@@ -3,9 +3,12 @@ import { useState, useEffect } from 'react';
 import { MapContainer } from 'react-leaflet/MapContainer'
 import { GeoJSON } from 'react-leaflet/GeoJSON'
 import mapdata from "./geojson/geo.json"
+//import mapdata from "./geojson/twcounty2010.json"
 import StatusBar from './components/StatusBar'
 
 const RoamingTaiwan = () => {
+
+    const DEBUG = true;
 
     let [isBingoWaiting, setIsBingoWaiting] = useState(0);
     let [selectedTownName, setSelectedTownName] = useState();
@@ -29,18 +32,21 @@ const RoamingTaiwan = () => {
         setIsBingoWaiting(isBingoWaiting=0);
     }
 
-    const mapFeature=(layer)=>{
+    const mapFeature=(country, layer)=>{
         layer.on({
+
             mouseover: (e) => {
                 e.target.setStyle({
                     fillOpacity: 0.5,
                 });
             },
+
             mouseout: (e) => {
                 e.target.setStyle({
                     fillOpacity: 1,
                 });
             },
+
             click: (e) => {
                 if((randomQuetion===e.sourceTarget.feature.properties.TOWNNAME)&&(isBingoWaiting===0)){
                     setSelectedTownName(selectedTownName=e.sourceTarget.feature.properties.TOWNNAME);
