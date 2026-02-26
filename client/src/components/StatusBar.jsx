@@ -2,7 +2,7 @@
 
 const StatusBar = ({ randomQuetion, selectedTownName, score, isBingoWaiting}) => {
     return(
-        <div className='right' align="center" style={{backgroundColor: isBingoWaiting? "rgb(67, 247, 67)": "rgba(204, 204, 204, 0.457)"}}>
+        <div className='status-bar' align="center" style={{backgroundColor: isBingoWaiting? "rgb(67, 247, 67)": "rgba(204, 204, 204, 0.457)"}}>
             <div className='upper'>題目：{randomQuetion}</div>
             <div className='middle'>所選擇的區域：{selectedTownName}</div>
             <div className='score'>分數：<b>{score}</b></div>
