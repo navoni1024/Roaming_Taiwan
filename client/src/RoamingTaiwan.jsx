@@ -2,8 +2,8 @@ import 'leaflet/dist/leaflet.css';
 import { useState, useEffect, useRef} from 'react';
 import { MapContainer } from 'react-leaflet/MapContainer'
 import { GeoJSON } from 'react-leaflet/GeoJSON'
-import mapdata from "./geojson/TW_town_TWD97_precision_6.json"
-import countryGeoJson from "./geojson/TW_country_TWD97_precision_6.json"
+import mapdata from "./geojson/TW_town_WGS84_precision_6.json"
+import countryGeoJson from "./geojson/TW_country_WGS84_precision_6.json"
 
 import StatusBar from './components/StatusBar'
 import SettingsBar from './components/SettingsBar';
