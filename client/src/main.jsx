@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 
-//-----
+/*
 
 import { DiscordSDK } from "@discord/embedded-app-sdk";
 
@@ -18,7 +18,7 @@ async function setupDiscordSdk() {
   await discordSdk.ready();
 }
 
-//-------
+//-------*/
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

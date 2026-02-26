@@ -12,13 +12,6 @@ import UserInfo from './components/UserInfo';
 const RoamingTaiwan = () => {
 
     //const DEBUG = true;
-    const isCountryBoundaryVisible = true;
-
-    const [isBingoWaiting, setIsBingoWaiting] = useState(0);
-    const [selectedTownName, setSelectedTownName] = useState();
-    const [randomQuetion, setRandomQuetion] = useState();
-    const [score, setScore] = useState(0);
-    const questionRef = useRef(randomQuetion);
 
     const mapStyle={
         weight: 1,
@@ -27,7 +20,7 @@ const RoamingTaiwan = () => {
         color: "rgb(230,230,230)",
     };
 
-    const countryBoundaryStyle = {
+    const defaultCountryBoundaryStyle = {
         weight: 1,
         opacity: 1,
         fillOpacity: 0,
@@ -40,6 +33,18 @@ const RoamingTaiwan = () => {
         [20.67667721806277, 125.49054604625438],
     ]
 
+    const [isBingoWaiting, setIsBingoWaiting] = useState(0);
+    const [selectedTownName, setSelectedTownName] = useState();
+    const [randomQuetion, setRandomQuetion] = useState();
+    const [score, setScore] = useState(0);
+    const questionRef = useRef(randomQuetion);
+
+    const [countryBoundaryStyle, setCountryBoundaryStyle] = useState(defaultCountryBoundaryStyle)
+    const [isCountryBoundaryVisible, setIsCountryBoundaryVisible] = useState(true);
+
+    const [timeLeft, setTimeLeft] = useState(1000)
+    const [isTimerLeftActive, setIsTimerLeftActive] = useState(false)
+
     //這裡好像是初始化
     useEffect(()=>{
         const keys = Object.keys(mapdata.features);
@@ -51,6 +56,24 @@ const RoamingTaiwan = () => {
         questionRef.current = randomQuetion;
     },[randomQuetion]);
 
+    
+    useEffect(() => {
+        let timer; //this is seconds
+
+        if(isTimerLeftActive && timeLeft > 0){
+            timer = setInterval(() => {
+                setTimeLeft(prev => prev - 1)
+            },1000);
+
+        }else if(timeLeft === 0){
+            setIsTimerLeftActive(false);
+            setTimeLeft(1000);
+        }
+
+        return () => clearInterval(timer);
+    },[isTimerLeftActive, timeLeft])
+
+
     const bingoAction = () => {
         const keys = Object.keys(mapdata.features);
         const randIndex = Math.floor(Math.random() * keys.length);
@@ -58,6 +81,27 @@ const RoamingTaiwan = () => {
         setScore(prev => prev + 1);
         setSelectedTownName("");
         setIsBingoWaiting(0);
+    }
+
+    const handleCountryBoundaryVisible = () => {
+        if(isCountryBoundaryVisible){
+            setCountryBoundaryStyle({
+                weight: 0,
+                opacity: 0,
+                fillOpacity: 0,
+                color: "rgb(1,1,1)",
+                interactive: false
+            })
+        }else{
+            setCountryBoundaryStyle({
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0,
+                color: "rgb(1,1,1)",
+                interactive: false
+            })
+        }
+        setIsCountryBoundaryVisible(!isCountryBoundaryVisible);
     }
 
     const mapFeature=(country, layer)=>{
@@ -79,7 +123,7 @@ const RoamingTaiwan = () => {
                 if((questionRef.current===e.sourceTarget.feature.properties.TOWNNAME)&&(isBingoWaiting===0)){
                     setSelectedTownName(e.sourceTarget.feature.properties.TOWNNAME);
                     setIsBingoWaiting(1);
-                    setTimeout(bingoAction,1000);
+                    setTimeout(bingoAction,1000); //this is microseconds
                 }
                 else if(isBingoWaiting===0){
                     setSelectedTownName(e.sourceTarget.feature.properties.TOWNNAME);
@@ -89,7 +133,7 @@ const RoamingTaiwan = () => {
     }
 
     return (
-        <div className='container'>
+        <div className='container' style={{ fontFamily: '"PMingLiU", "新細明體", serif' }}>
             <MapContainer center={[23.6, 120.9738819]} zoom={7} minZoom={7} maxBounds={mapBound}>
                 <GeoJSON style={mapStyle} data={mapdata} onEachFeature={mapFeature}></GeoJSON>
                 <GeoJSON style={countryBoundaryStyle} data={countryGeoJson} />
@@ -99,10 +143,16 @@ const RoamingTaiwan = () => {
                 <StatusBar 
                     randomQuetion={randomQuetion} 
                     selectedTownName={selectedTownName}
+                    timeLeft={timeLeft}
                     score={score}
                     isBingoWaiting={isBingoWaiting}
                 />
-                <SettingsBar />
+                <SettingsBar 
+                    isActive={isCountryBoundaryVisible}
+                    onClick={handleCountryBoundaryVisible}
+                    onGameStart={() => {setTimeLeft(100); setIsTimerLeftActive(true)}}
+                    isGameActive={isTimerLeftActive}
+                />
             </div>
         </div>
     ); 
