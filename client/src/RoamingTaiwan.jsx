@@ -2,8 +2,8 @@ import 'leaflet/dist/leaflet.css';
 import { useState, useEffect, useRef} from 'react';
 import { MapContainer } from 'react-leaflet/MapContainer'
 import { GeoJSON } from 'react-leaflet/GeoJSON'
-import mapdata from "./geojson/geo.json"
-import countryGeoJson from "./geojson/twcounty2010.json"
+import mapdata from "./geojson/TW_town_TWD97_precision_6.json"
+import countryGeoJson from "./geojson/TW_country_TWD97_precision_6.json"
 
 import StatusBar from './components/StatusBar'
 import SettingsBar from './components/SettingsBar';
@@ -28,7 +28,7 @@ const RoamingTaiwan = () => {
     };
 
     const countryBoundaryStyle = {
-        weight: 1.2,
+        weight: 1,
         opacity: 1,
         fillOpacity: 0,
         color: "rgb(1,1,1)",
