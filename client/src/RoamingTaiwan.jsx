@@ -9,6 +9,28 @@ import StatusBar from './components/StatusBar'
 import SettingsBar from './components/SettingsBar';
 import UserInfo from './components/UserInfo';
 
+/* 
+    Timer( seconds , countDown=false , pause=false){
+
+    }
+
+    gameMode = {"timeLimit", "questionsComplete"}
+    
+    gameActive = true/false 遊戲進行的鎖 
+
+    handleReset 重新開始
+
+    生成的題目陣列
+    猜的題目
+    正確數量/錯誤數量
+    顯示猜題狀況的圖層
+
+    -> 這些重新時要復舊
+
+
+
+*/
+
 const RoamingTaiwan = () => {
 
     //const DEBUG = true;
@@ -39,11 +61,19 @@ const RoamingTaiwan = () => {
     const [score, setScore] = useState(0);
     const questionRef = useRef(randomQuetion);
 
-    const [countryBoundaryStyle, setCountryBoundaryStyle] = useState(defaultCountryBoundaryStyle)
-    const [isCountryBoundaryVisible, setIsCountryBoundaryVisible] = useState(true);
+    const [timeLeft, setTimeLeft] = useState(0);
 
-    const [timeLeft, setTimeLeft] = useState(1000)
-    const [isTimerLeftActive, setIsTimerLeftActive] = useState(false)
+    const [gameActive, setGameActive] = useState(false);
+    const [gamePause, setGamePause] = useState(false);
+
+    const [gameMode, setGameMode] = useState('');                   // timeLimit questionComplete
+    const [gameTime, setGameTime] = useState(100);                  // for questionComplete
+    const [questionCount, setQuestionCount] = useState(10);         //這timeLimit的題數
+    const [acceptDuplicateQuestion, setAcceptDuplicateQuestion] = useState(false);
+    const [showAnswerArea, setShowAnswerArea] = useState(true);
+    const [showFullQuestion, setShowFullQuestion] = useState(true); //題目顯示縣市名 
+    const [showCountryBoundary, setShowCountryBoundary] = useState(true);
+    const [countryBoundaryStyle, setCountryBoundaryStyle] = useState(defaultCountryBoundaryStyle);
 
     //這裡好像是初始化
     useEffect(()=>{
@@ -56,22 +86,31 @@ const RoamingTaiwan = () => {
         questionRef.current = randomQuetion;
     },[randomQuetion]);
 
-    
     useEffect(() => {
         let timer; //this is seconds
 
-        if(isTimerLeftActive && timeLeft > 0){
-            timer = setInterval(() => {
-                setTimeLeft(prev => prev - 1)
-            },1000);
+        if(gameActive && !gamePause){
+            if(gameMode === 'timeLimit'){
+                if(timeTime > 0){    
+                    timer = setInterval(() => {
+                        setTimeLeft(prev => prev - 1)
+                    },1000);
 
-        }else if(timeLeft === 0){
-            setIsTimerLeftActive(false);
-            setTimeLeft(1000);
+                }else if(timeTime === 0){
+                    setgameActive(false);
+                    setTimeLeft(gameTime);
+                }
+            }
+
+            if(gameMode === "questionsComplete"){
+                timer = setInterval(() => {
+                    setTimeLeft(prev => prev + 1)
+                },1000);
+            }
         }
 
         return () => clearInterval(timer);
-    },[isTimerLeftActive, timeLeft])
+    },[gameActive, timeLeft, gamePause])
 
 
     const bingoAction = () => {
@@ -84,7 +123,7 @@ const RoamingTaiwan = () => {
     }
 
     const handleCountryBoundaryVisible = () => {
-        if(isCountryBoundaryVisible){
+        if(showCountryBoundary){
             setCountryBoundaryStyle({
                 weight: 0,
                 opacity: 0,
@@ -101,7 +140,7 @@ const RoamingTaiwan = () => {
                 interactive: false
             })
         }
-        setIsCountryBoundaryVisible(!isCountryBoundaryVisible);
+        setShowCountryBoundary(!showCountryBoundary);
     }
 
     const mapFeature=(country, layer)=>{
@@ -141,21 +180,23 @@ const RoamingTaiwan = () => {
             <div className='sidebar'>
                 <UserInfo />
                 <StatusBar 
-                    randomQuetion={randomQuetion} 
+                    questionTown={randomQuetion} 
                     selectedTownName={selectedTownName}
-                    timeLeft={timeLeft}
-                    score={score}
+                    timer={timeLeft}
+                    corretAnswerCount={score}
                     isBingoWaiting={isBingoWaiting}
                 />
                 <SettingsBar 
-                    isActive={isCountryBoundaryVisible}
-                    onClick={handleCountryBoundaryVisible}
-                    onGameStart={() => {setTimeLeft(100); setIsTimerLeftActive(true)}}
-                    isGameActive={isTimerLeftActive}
+                    gameMode={gameMode}
+                    gameTime={gameTime}
+                    acceptDuplicateQuestion={acceptDuplicateQuestion}
+                    showAnswerArea={showAnswerArea}
+                    showFullQuestion={showFullQuestion}
+                    showCountryBoundary={showCountryBoundary}
                 />
             </div>
         </div>
-    ); 
+    );
 }
 
 export default RoamingTaiwan;

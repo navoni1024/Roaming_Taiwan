@@ -1,0 +1,19 @@
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden; 
+  box-sizing: border-box;
+  background-color: black;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+
+body {
+  background-color: black;
+  font-family: PMingLiU, 新細明體, serif;
+}

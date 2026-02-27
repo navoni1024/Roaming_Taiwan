@@ -2,7 +2,7 @@
 
 const UserInfo = ({}) => {
     return(
-        <div className="user-info">
+        <div className="section user-info">
                 <p>UserInfo</p>
         </div>
     )
