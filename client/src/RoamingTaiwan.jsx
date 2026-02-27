@@ -118,16 +118,16 @@ const RoamingTaiwan = () => {
     useEffect( () => {
         if(showCountryBoundary){
             setCountryBoundaryStyle({
-                weight: 0,
-                opacity: 0,
+                weight: 1,
+                opacity: 1,
                 fillOpacity: 0,
                 color: "rgb(1,1,1)",
                 interactive: false
             })
         }else{
             setCountryBoundaryStyle({
-                weight: 1,
-                opacity: 1,
+                weight: 0,
+                opacity: 0,
                 fillOpacity: 0,
                 color: "rgb(1,1,1)",
                 interactive: false
