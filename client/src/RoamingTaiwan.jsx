@@ -8,6 +8,7 @@ import countryGeoJson from "./geojson/TW_country_WGS84_precision_6.json"
 import StatusBar from './components/StatusBar'
 import SettingsBar from './components/SettingsBar';
 import UserInfo from './components/UserInfo';
+import GameControls from './components/GameControls';
 
 /* 
     Timer( seconds , countDown=false , pause=false){
@@ -65,6 +66,7 @@ const RoamingTaiwan = () => {
 
     const [gameActive, setGameActive] = useState(false);
     const [gamePause, setGamePause] = useState(false);
+    const [isResult, setIsResult] = useState(false);
 
     const [gameMode, setGameMode] = useState('');                   // timeLimit questionComplete
     const [gameTime, setGameTime] = useState(100);                  // for questionComplete
@@ -143,6 +145,10 @@ const RoamingTaiwan = () => {
         setShowCountryBoundary(!showCountryBoundary);
     }
 
+    const handleReset = () => {
+        
+    }
+
     const mapFeature=(country, layer)=>{
         layer.on({
             
@@ -194,9 +200,19 @@ const RoamingTaiwan = () => {
                     showFullQuestion={showFullQuestion}
                     showCountryBoundary={showCountryBoundary}
                 />
+                <GameControls
+                    gameActive={gameActive}
+                    isResult={isResult}
+                    startOnClick={() => {setGameActive((prev) => !prev)}}
+                    pauseOnClick={() => {setGamePause((prev) => !prev)}}
+                    exitOnclick={handleReset}
+                />
+
             </div>
         </div>
     );
 }
+                /*
 
+                */
 export default RoamingTaiwan;
