@@ -35,6 +35,11 @@ import GameControls from './components/GameControls';
 const RoamingTaiwan = () => {
 
     //const DEBUG = true;
+    const QUESTION_COMPLETE_COUNT_MAX = 368;
+    const QUESTION_COMPLETE_COUNT_MIN = 5;
+    const TIMELIMIT_TIME_MAX = 210;
+    const TIMELIMIT_TIME_MIN = 5;
+
 
     const mapStyle={
         weight: 1,
@@ -56,28 +61,37 @@ const RoamingTaiwan = () => {
         [20.67667721806277, 125.49054604625438],
     ]
 
+    //原本的邏輯
     const [isBingoWaiting, setIsBingoWaiting] = useState(0);
     const [selectedTownName, setSelectedTownName] = useState();
     const [randomQuetion, setRandomQuetion] = useState();
     const [score, setScore] = useState(0);
     const questionRef = useRef(randomQuetion);
 
-    const [timeLeft, setTimeLeft] = useState(0);
-
+    //遊戲狀態
     const [gameActive, setGameActive] = useState(false);
     const [gamePause, setGamePause] = useState(false);
     const [isResult, setIsResult] = useState(false);
 
+    //設定
     const [gameMode, setGameMode] = useState('');                   // timeLimit questionComplete
     const [gameTime, setGameTime] = useState(100);                  // for questionComplete
-    const [questionCount, setQuestionCount] = useState(10);         //這timeLimit的題數
     const [acceptDuplicateQuestion, setAcceptDuplicateQuestion] = useState(false);
     const [showAnsweredArea, setShowAnsweredArea] = useState(true);
     const [showFullQuestion, setShowFullQuestion] = useState(true); //題目顯示縣市名 
     const [showCountryBoundary, setShowCountryBoundary] = useState(true);
     const [countryBoundaryStyle, setCountryBoundaryStyle] = useState(defaultCountryBoundaryStyle);
+    const [useTownId, setUseTownId] = useState(false); //如果false會使用TOWNNAME比對
 
-    //這裡好像是初始化
+    //遊戲進行時的參數
+    const [timeLeft, setTimeLeft] = useState(30);   //計時都用這個 所以要記得清空 對
+    const [questionsCount, setQuestionsCount] = useState(10);         //這timeLimit的題數
+    const [correctHistory, setCorrectHistory] = useState(); //[{TOWNID: , COUNTRYNAME: , TOWNNAME: }]
+    const [wrongHistory, setWrongHistory] = useState(); //[{TOWNID: , COUNTRYNAME: , TOWNNAME: }]
+
+
+//old version---------------------
+    
     useEffect(()=>{
         const keys = Object.keys(mapdata.features);
         const randIndex = Math.floor(Math.random() * keys.length);
@@ -87,6 +101,77 @@ const RoamingTaiwan = () => {
     useEffect(()=>{
         questionRef.current = randomQuetion;
     },[randomQuetion]);
+
+    
+    const bingoAction = () => {
+        const keys = Object.keys(mapdata.features);
+        const randIndex = Math.floor(Math.random() * keys.length);
+        setRandomQuetion(mapdata.features[randIndex].properties.TOWNNAME);
+        setScore(prev => prev + 1);
+        //for test
+        setCorrectAnswerCount(score);
+        //----
+        setSelectedTownName("");
+        setIsBingoWaiting(0);
+    }
+
+//----------------------------------
+
+    /* 
+    //New geojson
+    {
+        "type": "FeatureCollection",
+        "name": "TW_town_WGS84_precision_6",
+        "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+        "features": [
+        { "type": "Feature", "properties": { "TOWNID": "V02", "TOWNCODE": "10014020", "COUNTYNAME": "臺東縣", "TOWNNAME": "成功鎮", 
+    */
+
+
+    const getRandomQuestion = (prevQuestion) =>{
+        let ERROR_BOUNDS = 10
+        try{
+            const keys = Object.keys(mapdata.features);
+            do{
+                const randIndex = Math.floor(Math.random() * keys.length);
+                const randKey = keys[randIndex];
+                const randomResult = mapdata.features[randKey].properties
+                ERROR_BOUNDS--;
+
+                if(useTownId==true){
+                    if( randomResult.TOWNID !== prevQuestion.TOWNID ){
+                        let result = new Map([
+                            ['TOWNID', randomResult.TOWNID],
+                            ['COUNTRYNAME', randomResult.COUNTRYNAME],
+                            ['TOWNNAME', randomResult.TOWNNAME]
+                        ]);
+                        return result;
+                    }else{
+                        continue;
+                    }
+                }
+                else{
+                    if( randomResult.TOWNNAME !== prevQuestion.TOWNNAME ){
+                        let result = new Map([
+                            ['TOWNID', randomResult.TOWNID],
+                            ['COUNTRYNAME', randomResult.COUNTRYNAME],
+                            ['TOWNNAME', randomResult.TOWNNAME]
+                        ]);
+                        return result;
+                    }else{
+                        continue;
+                    }
+                }
+            }while(ERROR_BOUNDS > 0)
+
+            throw new Error('Random Failed, try too much times.');           
+        }
+        catch(err){
+            throw err;
+        }
+    }
+
+
 
     useEffect(() => {
         let timer; //this is seconds
@@ -135,20 +220,11 @@ const RoamingTaiwan = () => {
         }
     }, [showCountryBoundary])
 
-
-    const bingoAction = () => {
-        const keys = Object.keys(mapdata.features);
-        const randIndex = Math.floor(Math.random() * keys.length);
-        setRandomQuetion(mapdata.features[randIndex].properties.TOWNNAME);
-        setScore(prev => prev + 1);
-        setSelectedTownName("");
-        setIsBingoWaiting(0);
-    }
-
     const handleReset = () => {
-        
-    }
 
+
+    }
+    
     const mapFeature=(country, layer)=>{
         layer.on({
             
@@ -177,12 +253,18 @@ const RoamingTaiwan = () => {
         });
     }
 
+    //for test
+    const [correctAnswerCount, setCorrectAnswerCount] = useState(0);
+    //----
+
     return (
         <div className='container' style={{ fontFamily: '"PMingLiU", "新細明體", serif' }}>
+
             <MapContainer center={[23.6, 120.9738819]} zoom={7} minZoom={7} maxBounds={mapBound}>
                 <GeoJSON style={mapStyle} data={mapdata} onEachFeature={mapFeature}></GeoJSON>
                 <GeoJSON style={countryBoundaryStyle} data={countryGeoJson} />
             </MapContainer>
+
             <div className='sidebar'>
                 <UserInfo />
                 <StatusBar 
@@ -191,14 +273,16 @@ const RoamingTaiwan = () => {
                     selectedTownName={selectedTownName}
                     timer={timeLeft}
                     questionRemain={10}
-                    corretAnswerCount={score}
+                    correctAnswerCount={correctAnswerCount}
                     isBingoWaiting={isBingoWaiting}
                 />
                 <SettingsBar 
                     gameMode={gameMode}
                     setGameMode={setGameMode}
-                    gameTime={gameTime}
-                    setGameTime={setGameTime}
+                    gameTime={timeLeft}
+                    setGameTime={setTimeLeft}
+                    questionsCount={questionsCount}
+                    setQuestionsCount={setQuestionsCount}
                     acceptDuplicateQuestion={acceptDuplicateQuestion}
                     setAcceptDuplicateQuestion={setAcceptDuplicateQuestion}
                     showAnsweredArea={showAnsweredArea}
