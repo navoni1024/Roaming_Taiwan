@@ -43,7 +43,7 @@
 }
 
 .leaflet-container {
-  width: 69%; /*60%*/
+  width: 70%; /*60%*/
   height: 85vh;
 
   background-color: #c0c0c0;
@@ -58,7 +58,7 @@
 }
 
 .sidebar{
-  width: 17%; /*15%-18%*/
+  width: 15%; /*15%-18%*/
   height: 85vh;
   margin: 15px;
   margin-left: 30px;
