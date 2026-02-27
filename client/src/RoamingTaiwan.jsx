@@ -72,7 +72,7 @@ const RoamingTaiwan = () => {
     const [gameTime, setGameTime] = useState(100);                  // for questionComplete
     const [questionCount, setQuestionCount] = useState(10);         //這timeLimit的題數
     const [acceptDuplicateQuestion, setAcceptDuplicateQuestion] = useState(false);
-    const [showAnswerArea, setShowAnswerArea] = useState(true);
+    const [showAnsweredArea, setShowAnsweredArea] = useState(true);
     const [showFullQuestion, setShowFullQuestion] = useState(true); //題目顯示縣市名 
     const [showCountryBoundary, setShowCountryBoundary] = useState(true);
     const [countryBoundaryStyle, setCountryBoundaryStyle] = useState(defaultCountryBoundaryStyle);
@@ -93,12 +93,12 @@ const RoamingTaiwan = () => {
 
         if(gameActive && !gamePause){
             if(gameMode === 'timeLimit'){
-                if(timeTime > 0){    
+                if(timeLeft > 0){    
                     timer = setInterval(() => {
                         setTimeLeft(prev => prev - 1)
                     },1000);
 
-                }else if(timeTime === 0){
+                }else if(timeLeft === 0){
                     setgameActive(false);
                     setTimeLeft(gameTime);
                 }
@@ -115,16 +115,7 @@ const RoamingTaiwan = () => {
     },[gameActive, timeLeft, gamePause])
 
 
-    const bingoAction = () => {
-        const keys = Object.keys(mapdata.features);
-        const randIndex = Math.floor(Math.random() * keys.length);
-        setRandomQuetion(mapdata.features[randIndex].properties.TOWNNAME);
-        setScore(prev => prev + 1);
-        setSelectedTownName("");
-        setIsBingoWaiting(0);
-    }
-
-    const handleCountryBoundaryVisible = () => {
+    useEffect( () => {
         if(showCountryBoundary){
             setCountryBoundaryStyle({
                 weight: 0,
@@ -142,7 +133,16 @@ const RoamingTaiwan = () => {
                 interactive: false
             })
         }
-        setShowCountryBoundary(!showCountryBoundary);
+    }, [showCountryBoundary])
+
+
+    const bingoAction = () => {
+        const keys = Object.keys(mapdata.features);
+        const randIndex = Math.floor(Math.random() * keys.length);
+        setRandomQuetion(mapdata.features[randIndex].properties.TOWNNAME);
+        setScore(prev => prev + 1);
+        setSelectedTownName("");
+        setIsBingoWaiting(0);
     }
 
     const handleReset = () => {
@@ -186,19 +186,27 @@ const RoamingTaiwan = () => {
             <div className='sidebar'>
                 <UserInfo />
                 <StatusBar 
+                    gameMode={gameMode}
                     questionTown={randomQuetion} 
                     selectedTownName={selectedTownName}
                     timer={timeLeft}
+                    questionRemain={10}
                     corretAnswerCount={score}
                     isBingoWaiting={isBingoWaiting}
                 />
                 <SettingsBar 
                     gameMode={gameMode}
+                    setGameMode={setGameMode}
                     gameTime={gameTime}
+                    setGameTime={setGameTime}
                     acceptDuplicateQuestion={acceptDuplicateQuestion}
-                    showAnswerArea={showAnswerArea}
+                    setAcceptDuplicateQuestion={setAcceptDuplicateQuestion}
+                    showAnsweredArea={showAnsweredArea}
+                    setShowAnsweredArea={setShowAnsweredArea}
                     showFullQuestion={showFullQuestion}
+                    setShowFullQuestion={setShowFullQuestion}
                     showCountryBoundary={showCountryBoundary}
+                    setShowCountryBoundary={setShowCountryBoundary}
                 />
                 <GameControls
                     gameActive={gameActive}
@@ -212,7 +220,5 @@ const RoamingTaiwan = () => {
         </div>
     );
 }
-                /*
 
-                */
 export default RoamingTaiwan;

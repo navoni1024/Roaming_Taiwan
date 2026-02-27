@@ -62,6 +62,8 @@
   height: 85vh;
   margin: 15px;
   margin-left: 30px;
+
+  min-width: 240px; /*之後改*/
   
   display: flex;
   flex-direction: column;
@@ -128,6 +130,7 @@
 
   width: auto;
 
+  overflow-y: auto;
 }
 
 .settings-bar ul {
@@ -138,6 +141,10 @@
 
 .settings-bar ul li{
   margin-bottom: 10px;
+}
+
+.setting-bar ul li span{
+  white-space: nowrap;
 }
 
 .settings-bar ul li select{
@@ -187,6 +194,15 @@
   padding: 5px 9px 3px 11px;
 }
 
+#game-time-field{
+  float: right;
+}
+
+.settings-bar input{
+  width: 60px;
+}
+
+
 .game-controls{
   height: 10%;
 
@@ -198,9 +214,10 @@
   align-items: center;
 }
 
+
 .game-controls button{
   float: right;
-  margin: 10px;
+  margin: 5%;
 
   width: 60px;
   background-color: #c0c0c0;
@@ -219,6 +236,17 @@
 }
 
 .game-controls button:active{
+  border-top: 2px solid #808080;
+  border-left: 2px solid #808080;
+  border-right: 2px solid #ffffff;
+  border-bottom: 2px solid #ffffff;
+  box-shadow: inset 1px 1px 0 0 #000000;
+
+  padding: 5px 9px 3px 11px;
+  
+}
+
+.game-controls.active{
   border-top: 2px solid #808080;
   border-left: 2px solid #808080;
   border-right: 2px solid #ffffff;
