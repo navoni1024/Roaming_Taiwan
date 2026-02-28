@@ -35,6 +35,7 @@ const RoamingTaiwan = () => {
     const [gameActive, setGameActive] = useState(false);
     const [gamePause, setGamePause] = useState(false);
     const [isResult, setIsResult] = useState(false);
+    const [isBingoWaiting, setIsBingoWaiting] = useState(false);
 
     //設定
     const [gameMode, setGameMode] = useState('');                   // timeLimit questionsComplete
@@ -48,6 +49,7 @@ const RoamingTaiwan = () => {
 
     //遊戲進行時的參數
 
+    const [selectedTownName, setSelectedTownName] = useState('');
     const [timeLeft, setTimeLeft] = useState(TIMER_DEFAULT);   //計時都用這個 所以要記得清空 對
     const [questionsList, setQuestionsList] = useState([{
         'TOWNID': '',
@@ -67,8 +69,7 @@ const RoamingTaiwan = () => {
         'TOWNNAME': ''
     },
     ]);
-    const [isBingoWaiting, setIsBingoWaiting] = useState(false);
-    const [selectedTownName, setSelectedTownName] = useState('');
+    
 
     // 視窗處理
 
@@ -137,7 +138,8 @@ const RoamingTaiwan = () => {
     useEffect(() => {
         let timer; //this is seconds
 
-        if(gameActive && !gamePause){
+        if(gameActive && !gamePause && !isResult){
+
             if(gameMode === 'timeLimit'){
                 if(timeLeft > 0){    
                     timer = setInterval(() => {
@@ -321,6 +323,7 @@ const RoamingTaiwan = () => {
     const [countryBoundaryStyle, setCountryBoundaryStyle] = useState(defaultCountryBoundaryStyle);
 
 
+
     useEffect (() => {
         if(gamePauseRef.current){
             setMapStyle({
@@ -356,9 +359,9 @@ const RoamingTaiwan = () => {
         }
     }, [showCountryBoundary])
 
+    //互動的地圖
     const mapFeature=(country, layer)=>{
         layer.on({
-
             mouseover: (e) => {
                 if(gamePauseRef.current) return;    //直接這樣硬插好像蠻暴力 但試了很多只有這樣能阻止互動
                 e.target.setStyle({
@@ -388,11 +391,29 @@ const RoamingTaiwan = () => {
         });
     }
 
+    //顯示答題相關的地圖
+    const showAnsweredStyle = (feature) => {
+        console.log(feature);
+        if(feature.TOWNNAME === "樹林區"){
+            return {
+                fillColor: '#000000',
+                fillOpacity: 1,
+                weight: 0,
+                opacity: 0,
+                interactive: false
+            }
+        }else{
+            return{
+                fillOpacity: 0.2,
+                weight: 0,
+                opacity: 0,
+                interactive: false
+            }
+        }
+    }
 
 
-    //for test
-    //const [correctAnswerCount, setCorrectAnswerCount] = useState(0);
-    //----
+    //網頁結構---------------------------------------------------------------
 
     return (
         <div className='container' style={{ fontFamily: '"PMingLiU", "新細明體", serif' }}>
@@ -400,6 +421,7 @@ const RoamingTaiwan = () => {
                 <MapContainer center={[23.6, 120.9738819]} zoom={7} minZoom={7} maxBounds={mapBound}>
                     <GeoJSON style={mapStyle} data={mapdata} onEachFeature={mapFeature}></GeoJSON>
                     <GeoJSON style={countryBoundaryStyle} data={countryGeoJson} />
+                    <GeoJSON style={showAnsweredStyle} data={mapdata} />
                 </MapContainer>
             </div>
             <div className='sidebar'>

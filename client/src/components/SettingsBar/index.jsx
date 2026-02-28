@@ -80,7 +80,7 @@ const SettingsBar = ({
                     <select id="gamemode-select" value={gameMode} onChange={handleGameModeChange}>
                         <option value="">請選擇模式^^</option>
                         <option value="timeLimit">限時答題</option>
-                        <option value="questionsComplete">計時答題</option> 
+                        <option value="questionsComplete">答題計時</option> 
                     </select>
                 </li>  
                 <GameModeParameters/>
