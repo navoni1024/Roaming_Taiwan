@@ -39,7 +39,7 @@ const StatusBar = ({ isResult, gameActive, gameMode, questionTown, selectedTownN
                     </tr>
                     <tr>
                         <td>花費時間: </td>
-                        <td style={{float: 'right'}}>{Timer}</td>
+                        <td style={{float: 'right'}}>{timer}</td>
                     </tr>
                 </>
             )

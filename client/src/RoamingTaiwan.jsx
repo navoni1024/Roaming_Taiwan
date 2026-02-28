@@ -393,7 +393,6 @@ const RoamingTaiwan = () => {
 
     //顯示答題相關的地圖
     const showAnsweredStyle = (feature) => {
-        console.log(feature);
         if(feature.TOWNNAME === "樹林區"){
             return {
                 fillColor: '#000000',
