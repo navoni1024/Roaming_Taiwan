@@ -94,7 +94,7 @@ const SettingsBar = ({
                     </button>
                 </li>
                 <li>
-                    <span>顯示已答對區域:</span>
+                    <span><del>顯示已答對區域:</del></span>
                     <button
                         className={showAnsweredArea ? 'game-controls active' : 'game-controls'}
                         onClick={() => {setShowAnsweredArea(!showAnsweredArea)}}

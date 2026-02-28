@@ -1,5 +1,5 @@
 import 'leaflet/dist/leaflet.css';
-import { useState, useEffect, useRef} from 'react';
+import { useState, useEffect, useRef, useMemo} from 'react';
 import { MapContainer } from 'react-leaflet/MapContainer'
 import { GeoJSON } from 'react-leaflet/GeoJSON'
 import mapdata from "./geojson/TW_town_WGS84_precision_6.json"
@@ -19,7 +19,7 @@ const RoamingTaiwan = () => {
     const TIMELIMIT_TIME_MAX = 210;
     const TIMELIMIT_TIME_MIN = 5;
 
-    const TIMER_DEFAULT = Number(120);
+    const TIMER_DEFAULT = Number(65);
     const QUESTIONS_COUNT_DEFAULT = 3;
     
     /*
@@ -194,7 +194,7 @@ const RoamingTaiwan = () => {
     const handleReset = () => {
         //setgameTime(TIMER_DEFAULT);
         //setQuestionsCount(QUESTIONS_COUNT_DEFAULT);
-        
+        setGameTime(TIMER_DEFAULT);
         setTimeLeft(0);
         setQuestionsList([{
             'TOWNID': '',
@@ -202,11 +202,15 @@ const RoamingTaiwan = () => {
             'TOWNNAME': ''
         },
         ]);
+        
         setCorrectHistory([]);
         setWrongHistory([]);
         setSelectedTownName('');
         setIsBingoWaiting(false);
         setGamePause(false);
+
+        setCorrectHistory([]);
+        setWrongHistory([]);
     }
 
     const timeLimitModeInit = () => {
@@ -235,7 +239,6 @@ const RoamingTaiwan = () => {
     const bingoAction = () => {
 
         if(modeRef.current==='timeLimit'){
-            console.log("in timeLimit process");
             const newQuestion = getRandomQuestion();
             setQuestionsList([newQuestion]);
         }
@@ -265,7 +268,7 @@ const RoamingTaiwan = () => {
                 setCorrectHistory( prev => [...prev,  answerRef.current]);
                 bingoAction();
             }else{
-                setWrongHistory( prev => [...prev,  answerRef.current]);
+                setWrongHistory( prev => [...prev,  {'TOWNID': clickProperties.TOWNID, 'COUNTYNAME': clickProperties.COUNTYNAME, 'TOWNNAME': clickProperties.TOWNNAME}]);
             }
         }else{
             if(clickProperties.TOWNNAME === answerRef.current.TOWNNAME){
@@ -273,7 +276,7 @@ const RoamingTaiwan = () => {
                 setCorrectHistory( prev => [...prev,  answerRef.current]);
                 bingoAction();
             }else{
-                setWrongHistory( prev => [...prev,  answerRef.current]);
+                setWrongHistory( prev => [...prev,  {'TOWNID': clickProperties.TOWNID, 'COUNTYNAME': clickProperties.COUNTYNAME, 'TOWNNAME': clickProperties.TOWNNAME}]);
             }
         }
     }
@@ -322,7 +325,16 @@ const RoamingTaiwan = () => {
     const [mapStyle, setMapStyle] = useState(defaultMapStyle);
     const [countryBoundaryStyle, setCountryBoundaryStyle] = useState(defaultCountryBoundaryStyle);
 
-
+    /*
+    const mapDataTownNameSet = useMemo(() => {
+        const townNameSet = new Set();
+        mapdata.features.forEach( (feature) => {
+            townNameSet.add(feature.properties.TOWNNAME);
+        });
+        console.log(townNameSet);
+        return townNameSet;
+    }, [mapdata]) 
+    */
 
     useEffect (() => {
         if(gamePauseRef.current){
@@ -391,36 +403,43 @@ const RoamingTaiwan = () => {
         });
     }
 
-    //顯示答題相關的地圖
-    const showAnsweredStyle = (feature) => {
-        if(feature.TOWNNAME === "樹林區"){
-            return {
-                fillColor: '#000000',
-                fillOpacity: 1,
-                weight: 0,
-                opacity: 0,
-                interactive: false
-            }
-        }else{
-            return{
-                fillOpacity: 0.2,
-                weight: 0,
-                opacity: 0,
-                interactive: false
-            }
-        }
-    }
+    //  顯示答題相關的地圖
+    //  感覺問題沒多到那樣就先暴力解好了
 
+    /*
+        該圖層狀態
+        { TOWNID : status}
+        status: 0 無色
+        status: 1 對過
+        status: 2 錯過
+        status: 3 重複    
+    */
+
+    /*
+    const [correctTownIdArray, setCorrectTownIdArray] = useState([]);
+    const [wrongTownIdArray, setWrongTownIdArray]= useState([]);
+
+    useEffect(() => {
+        const updated = correctHistory.map(item => item.TOWNID);
+        setCorrectTownIdArray(updated);
+    },[correctHistory])
+
+    useEffect(() => {
+        const updated = wrongHistory.map(item => item.TOWNID);
+        setWrongTownIdArray(updated);
+    },[wrongHistory])
+
+    <GeoJSON style={{...showStatusStyle, weight: 0, opacity: 0, interactive: false}} data={mapdata} />
+    */
 
     //網頁結構---------------------------------------------------------------
 
     return (
         <div className='container' style={{ fontFamily: '"PMingLiU", "新細明體", serif' }}>
             <div className='game-area' style={overlayStyle}>
-                <MapContainer center={[23.6, 120.9738819]} zoom={7} minZoom={7} maxBounds={mapBound}>
+                <MapContainer center={[23.6, 120.9738819]} zoom={7} minZoom={7} zoomDelta={0.5} zoomSnap={0.5} wheelPxPerZoomLevel={120} zoomAnimation={true} zoomAnimationThreshold={4} maxBounds={mapBound} preferCanvas={true}>
                     <GeoJSON style={mapStyle} data={mapdata} onEachFeature={mapFeature}></GeoJSON>
                     <GeoJSON style={countryBoundaryStyle} data={countryGeoJson} />
-                    <GeoJSON style={showAnsweredStyle} data={mapdata} />
                 </MapContainer>
             </div>
             <div className='sidebar'>
