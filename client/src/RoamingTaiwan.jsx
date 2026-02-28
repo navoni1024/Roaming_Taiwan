@@ -10,36 +10,17 @@ import SettingsBar from './components/SettingsBar';
 import UserInfo from './components/UserInfo';
 import GameControls from './components/GameControls';
 
-/* 
-    Timer( seconds , countDown=false , pause=false){
-
-    }
-
-    gameMode = {"timeLimit", "questionsComplete"}
-    
-    gameActive = true/false 遊戲進行的鎖 
-
-    handleReset 重新開始
-
-    生成的題目陣列
-    猜的題目
-    正確數量/錯誤數量
-    顯示猜題狀況的圖層
-
-    -> 這些重新時要復舊
-
-
-
-*/
+const DEBUG = true;
 
 const RoamingTaiwan = () => {
 
-    //const DEBUG = true;
     const QUESTION_COMPLETE_COUNT_MAX = 368;
-    const QUESTION_COMPLETE_COUNT_MIN = 5;
+    const QUESTION_COMPLETE_COUNT_MIN = 3;
     const TIMELIMIT_TIME_MAX = 210;
     const TIMELIMIT_TIME_MIN = 5;
 
+    const TIMER_DEFAULT = Number(120);
+    const QUESTIONS_COUNT_DEFAULT = 3;
 
     const mapStyle={
         weight: 1,
@@ -60,38 +41,57 @@ const RoamingTaiwan = () => {
         [26.504979796639104, 116.100698791452],
         [20.67667721806277, 125.49054604625438],
     ]
-
+    
+    /*
     //原本的邏輯
     const [isBingoWaiting, setIsBingoWaiting] = useState(0);
     const [selectedTownName, setSelectedTownName] = useState();
     const [randomQuetion, setRandomQuetion] = useState();
     const [score, setScore] = useState(0);
     const questionRef = useRef(randomQuetion);
-
+    */
+   
     //遊戲狀態
     const [gameActive, setGameActive] = useState(false);
     const [gamePause, setGamePause] = useState(false);
     const [isResult, setIsResult] = useState(false);
 
     //設定
-    const [gameMode, setGameMode] = useState('');                   // timeLimit questionComplete
-    const [gameTime, setGameTime] = useState(100);                  // for questionComplete
+    const [gameMode, setGameMode] = useState('');                   // timeLimit questionsComplete
+    const [gameTime, setGameTime] = useState(100);                  // for timeLimit
+    const [questionsCount, setQuestionsCount] = useState(QUESTIONS_COUNT_DEFAULT);     //questionsComplete題數(已棄用)
     const [acceptDuplicateQuestion, setAcceptDuplicateQuestion] = useState(false);
     const [showAnsweredArea, setShowAnsweredArea] = useState(true);
     const [showFullQuestion, setShowFullQuestion] = useState(true); //題目顯示縣市名 
-    const [showCountryBoundary, setShowCountryBoundary] = useState(true);
+    const [showCountryBoundary, setShowCountryBoundary] = useState(true); //總有一天會回來把他改成county的 吃了文化不足的虧:hakase:
     const [countryBoundaryStyle, setCountryBoundaryStyle] = useState(defaultCountryBoundaryStyle);
     const [useTownId, setUseTownId] = useState(false); //如果false會使用TOWNNAME比對
 
     //遊戲進行時的參數
-    const [timeLeft, setTimeLeft] = useState(30);   //計時都用這個 所以要記得清空 對
-    const [questionsCount, setQuestionsCount] = useState(10);         //這timeLimit的題數
-    const [correctHistory, setCorrectHistory] = useState(); //[{TOWNID: , COUNTRYNAME: , TOWNNAME: }]
-    const [wrongHistory, setWrongHistory] = useState(); //[{TOWNID: , COUNTRYNAME: , TOWNNAME: }]
-
+    const [timeLeft, setTimeLeft] = useState(TIMER_DEFAULT);   //計時都用這個 所以要記得清空 對
+    const [questionsList, setQuestionsList] = useState([{
+        'TOWNID': '',
+        'COUNTYNAME': '',
+        'TOWNNAME': ''
+    },
+    ]);
+    const [correctHistory, setCorrectHistory] = useState([{
+        'TOWNID': '',
+        'COUNTYNAME': '',
+        'TOWNNAME': ''
+    },
+    ]);
+    const [wrongHistory, setWrongHistory] = useState([{
+        'TOWNID': '',
+        'COUNTYNAME': '',
+        'TOWNNAME': ''
+    },
+    ]);
+    const [isBingoWaiting, setIsBingoWaiting] = useState(false);
+    const [selectedTownName, setSelectedTownName] = useState();
 
 //old version---------------------
-    
+/*    
     useEffect(()=>{
         const keys = Object.keys(mapdata.features);
         const randIndex = Math.floor(Math.random() * keys.length);
@@ -114,7 +114,7 @@ const RoamingTaiwan = () => {
         setSelectedTownName("");
         setIsBingoWaiting(0);
     }
-
+*/
 //----------------------------------
 
     /* 
@@ -128,51 +128,39 @@ const RoamingTaiwan = () => {
     */
 
 
-    const getRandomQuestion = (prevQuestion) =>{
-        let ERROR_BOUNDS = 10
-        try{
-            const keys = Object.keys(mapdata.features);
-            do{
-                const randIndex = Math.floor(Math.random() * keys.length);
-                const randKey = keys[randIndex];
-                const randomResult = mapdata.features[randKey].properties
-                ERROR_BOUNDS--;
+    const getRandomQuestion = (prevQuestion={'TOWNID': '', 'COUNTYNAME': '', 'TOWNNAME':''}) =>{
+        
+        let ERROR_BOUNDS = 10;
+        const keys = Object.keys(mapdata.features);
 
-                if(useTownId==true){
-                    if( randomResult.TOWNID !== prevQuestion.TOWNID ){
-                        let result = new Map([
-                            ['TOWNID', randomResult.TOWNID],
-                            ['COUNTRYNAME', randomResult.COUNTRYNAME],
-                            ['TOWNNAME', randomResult.TOWNNAME]
-                        ]);
-                        return result;
-                    }else{
-                        continue;
-                    }
-                }
-                else{
-                    if( randomResult.TOWNNAME !== prevQuestion.TOWNNAME ){
-                        let result = new Map([
-                            ['TOWNID', randomResult.TOWNID],
-                            ['COUNTRYNAME', randomResult.COUNTRYNAME],
-                            ['TOWNNAME', randomResult.TOWNNAME]
-                        ]);
-                        return result;
-                    }else{
-                        continue;
-                    }
-                }
-            }while(ERROR_BOUNDS > 0)
+        do{
+            const randIndex = Math.floor(Math.random() * keys.length);
+            const randKey = keys[randIndex];
+            const randomResult = mapdata.features[randKey].properties;
+            ERROR_BOUNDS--;
 
-            throw new Error('Random Failed, try too much times.');           
-        }
-        catch(err){
-            throw err;
-        }
+            if( randomResult.TOWNNAME !== prevQuestion.TOWNNAME ){
+
+                let result = {
+                    'TOWNID': randomResult.TOWNID,
+                    'COUNTYNAME': randomResult.COUNTYNAME,
+                    'TOWNNAME': randomResult.TOWNNAME
+                };
+
+                if(DEBUG){ console.log(result); }
+                
+                return result;
+            }else{
+                continue;
+            }
+            
+        }while(ERROR_BOUNDS > 0)
+
+        return {'TOWNID': 'ERROR', 'COUNTYNAME': 'ERROR', 'TOWNNAME':'ERROR'}; //有空再回來改 先這樣 
     }
 
 
-
+    //計時器
     useEffect(() => {
         let timer; //this is seconds
 
@@ -184,7 +172,7 @@ const RoamingTaiwan = () => {
                     },1000);
 
                 }else if(timeLeft === 0){
-                    setgameActive(false);
+                    setGameActive(false);
                     setTimeLeft(gameTime);
                 }
             }
@@ -199,6 +187,141 @@ const RoamingTaiwan = () => {
         return () => clearInterval(timer);
     },[gameActive, timeLeft, gamePause])
 
+    /*
+                gameActive  isResult
+        開始頁面    F           F           
+        遊戲中      T           F           
+        結束        T           T           
+    */
+
+    useEffect( () => {
+        if(gameActive){
+            if(isResult){
+                //到結束畫面                
+
+            }else{
+                //遊戲初始化
+                //TODO: 鎖上settingBar
+                if(gameMode==='timeLimit'){
+                    timeLimitModeInit();
+
+                }
+                if(gameMode==='questionsComplete'){
+                    questionsCompleteModeInit();
+                }
+            }
+
+        }else{
+            //到開始畫面
+            handleReset();
+        }
+    }, [gameActive, isResult])
+
+    const handleReset = () => {
+        setGameTime(0);
+        setTimeLeft(TIMER_DEFAULT);
+        setQuestionsCount(QUESTIONS_COUNT_DEFAULT);
+        setQuestionsList([{
+            'TOWNID': '',
+            'COUNTYNAME': '',
+            'TOWNNAME': ''
+        },
+        ])
+        setCorrectHistory([]);
+        setWrongHistory([]);
+        setIsBingoWaiting(false);
+    }
+
+    const timeLimitModeInit = () => {
+        const newQuestion = getRandomQuestion();
+
+        setQuestionsList([newQuestion]);
+        setGameTime(0);
+        setCorrectHistory([]);
+        setWrongHistory([]);
+    }
+
+    const questionsCompleteModeInit = () => {
+        let newQuestionList = []
+
+        for( let i = 0;i < questionsCount; i++ ){
+            const newQuestion = getRandomQuestion();
+            newQuestionList.push(newQuestion);
+        }
+
+        setQuestionsList([...newQuestionList])
+        //setQuestionsRemain(newQuestionList.length);
+        setTimeLeft(0);
+        setCorrectHistory([]);
+        setWrongHistory([]);
+    }
+
+    const bingoAction = () => {
+
+        if(modeRef.current==='timeLimit'){
+            console.log("in timeLimit process");
+            const newQuestion = getRandomQuestion();
+            setQuestionsList([newQuestion]);
+        }
+
+        if(modeRef.current==='questionsComplete'){
+            setQuestionsList( (prev) => {
+                if( prev.length <= 1){
+                    setIsResult(true);
+                    return prev;
+                }else{
+                    return prev.slice(1);
+                }
+            })
+        }
+    };
+
+    useEffect(() => {
+        if(isBingoWaiting === true && gameActive === true){
+            setIsBingoWaiting(false);
+        }
+    }, [questionsList])
+
+    const judgeClick = (clickProperties) => {
+        if(useTownId){
+            if(clickProperties.TOWNID === answerRef.current.TOWNID){
+                setIsBingoWaiting(true);
+                setCorrectHistory( prev => [...prev,  answerRef.current]);
+                bingoAction();
+            }else{
+                setWrongHistory( prev => [...prev,  answerRef.current]);
+            }
+        }else{
+            if(clickProperties.TOWNNAME === answerRef.current.TOWNNAME){
+                setIsBingoWaiting(true);
+                setCorrectHistory( prev => [...prev,  answerRef.current]);
+                bingoAction();
+            }else{
+                setWrongHistory( prev => [...prev,  answerRef.current]);
+            }
+        }
+    }
+
+    //地圖相關
+
+    //ref for leaflet
+    const answerRef = useRef({});
+    const modeRef = useRef('');
+    const useTownIdRef = useRef(useTownId);
+    const gameActiveRef = useRef(gameActive);
+    const gamePauseRef = useRef(gamePause);
+    const isResultRef = useRef(isResult);
+    const isBingoWaitingRef = useRef(isBingoWaiting);
+
+    useEffect(() => {
+        answerRef.current = questionsList[0];
+        modeRef.current = gameMode;
+        useTownIdRef.current = useTownId;
+        gameActiveRef.current = gameActive;
+        gamePauseRef.current = gamePause;
+        isResultRef.current = isResult;
+        isBingoWaitingRef.current = isBingoWaiting;
+    },[questionsList, gameMode, useTownId, gamePause, isResult, isBingoWaiting]);
 
     useEffect( () => {
         if(showCountryBoundary){
@@ -220,11 +343,6 @@ const RoamingTaiwan = () => {
         }
     }, [showCountryBoundary])
 
-    const handleReset = () => {
-
-
-    }
-    
     const mapFeature=(country, layer)=>{
         layer.on({
             
@@ -241,20 +359,19 @@ const RoamingTaiwan = () => {
             },
 
             click: (e) => {
-                if((questionRef.current===e.sourceTarget.feature.properties.TOWNNAME)&&(isBingoWaiting===0)){
-                    setSelectedTownName(e.sourceTarget.feature.properties.TOWNNAME);
-                    setIsBingoWaiting(1);
-                    setTimeout(bingoAction,1000); //this is microseconds
+                if(gameActiveRef.current && !isBingoWaitingRef.current){
+                    //console.log('judging'+e.sourceTarget.feature.properties.TOWNNAME);
+                    judgeClick(e.sourceTarget.feature.properties);
                 }
-                else if(isBingoWaiting===0){
-                    setSelectedTownName(e.sourceTarget.feature.properties.TOWNNAME);
-                }
+                setSelectedTownName(e.sourceTarget.feature.properties.TOWNNAME);
             }
         });
     }
 
+
+
     //for test
-    const [correctAnswerCount, setCorrectAnswerCount] = useState(0);
+    //const [correctAnswerCount, setCorrectAnswerCount] = useState(0);
     //----
 
     return (
@@ -269,11 +386,11 @@ const RoamingTaiwan = () => {
                 <UserInfo />
                 <StatusBar 
                     gameMode={gameMode}
-                    questionTown={randomQuetion} 
+                    questionTown={questionsList[0].TOWNNAME} 
                     selectedTownName={selectedTownName}
                     timer={timeLeft}
-                    questionRemain={10}
-                    correctAnswerCount={correctAnswerCount}
+                    questionsRemain={questionsList.length}
+                    correctAnswerCount={correctHistory.length}
                     isBingoWaiting={isBingoWaiting}
                 />
                 <SettingsBar 
@@ -297,7 +414,10 @@ const RoamingTaiwan = () => {
                     isResult={isResult}
                     startOnClick={() => {setGameActive((prev) => !prev)}}
                     pauseOnClick={() => {setGamePause((prev) => !prev)}}
-                    exitOnclick={handleReset}
+                    exitOnclick={() => {
+                        setGameActive(false);
+                        setIsResult(false);
+                    }}
                 />
 
             </div>

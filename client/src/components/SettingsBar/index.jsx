@@ -27,7 +27,7 @@ const SettingsBar = ({
                 <li >
                     <span id="game-time">遊戲時間:</span>
                     <span id="game-time-field">
-                        <input type="number" value={gameTime} onChange={(e) => {setGameTime(e.target.value)}}></input>
+                        <input type="number" value={gameTime} onChange={(e) => {setGameTime(Number(e.target.value))}}></input>
                         <span id="seconds"> 秒</span>
                     </span>
                 </li>
@@ -39,7 +39,7 @@ const SettingsBar = ({
                 <li >
                     <span id="game-time">題目數量:</span>   
                     <span id="game-time-field">
-                        <input type="number" value={questionsCount} onChange={(e) => {setQuestionsCount(e.target.value)}}></input>
+                        <input type="number" value={questionsCount} onChange={(e) => {setQuestionsCount(Number(e.target.value))}}></input>
                         <span id="seconds"> 題</span>
                     </span>
                 </li>

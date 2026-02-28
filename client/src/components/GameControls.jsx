@@ -11,7 +11,7 @@ const GameControls = ({gameActive, isResult, startOnClick, pauseOnClick, exitOnc
         if(!isResult){
             return(
                 <div className="game-controls">
-                    <button onClick={pauseOnClick}>暫停</button>
+                    <button onClick={pauseOnClick}>暫停</button>    
                     <button onClick={exitOnclick}>退出</button>
                 </div>
             )

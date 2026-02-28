@@ -1,4 +1,4 @@
-    const GameModeInfo = ({gameMode, timer, correctAnswerCount, questionRemain}) => {
+    const GameModeInfo = ({gameMode, timer, correctAnswerCount, questionsRemain}) => {
         if(gameMode === 'timeLimit'){
             return(
                 <>
@@ -9,7 +9,7 @@
         }else if(gameMode === 'questionsComplete'){
             return(
                 <>
-                    <div>剩餘題目: <b>{questionRemain}</b> 題</div>
+                    <div>剩餘題目: <b>{questionsRemain}</b> 題</div>
                     <div>花費時間: <b>{timer}</b> 秒</div>
                 </>
             )
