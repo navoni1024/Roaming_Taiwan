@@ -3,7 +3,7 @@ import GameModeInfo from './GameModeInfo'
 import banner from '../../assets/Roaming_Taiwan_Banner.png';
 import resultBanner from '../../assets/1057.gif';
 
-const StatusBar = ({ isResult, gameActive, gameMode, questionTown, selectedTownName, timer, gameTime, questionsRemain, correctAnswerCount = 0, wrongAnswerCount = 0, isBingoWaiting}) => {
+const StatusBar = ({ isResult, gameActive, gameMode, questionTown, selectedTownName, timer, gameTime, questionsRemain, questionsCount, correctAnswerCount = 0, wrongAnswerCount = 0, isBingoWaiting}) => {
 
     const GameModeResult = () => {
         if(gameMode==='timeLimit'){
@@ -35,7 +35,7 @@ const StatusBar = ({ isResult, gameActive, gameMode, questionTown, selectedTownN
                     </tr>
                     <tr>
                         <td>題目數量: </td>
-                        <td style={{float: 'right'}}>{}</td>
+                        <td style={{float: 'right'}}>{questionsCount}</td>
                     </tr>
                     <tr>
                         <td>花費時間: </td>

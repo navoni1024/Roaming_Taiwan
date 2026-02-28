@@ -433,6 +433,7 @@ const RoamingTaiwan = () => {
                     selectedTownName={selectedTownName}
                     gameTime={gameTime}
                     timer={timeLeft}
+                    questionsCount={questionsCount}
                     questionsRemain={questionsList.length}
                     correctAnswerCount={correctHistory.length}
                     wrongAnswerCount={wrongHistory.length}
