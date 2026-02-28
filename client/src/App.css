@@ -42,7 +42,7 @@
   background-color: #008080;
 }
 
-.leaflet-container {
+.game-area {
   width: 70%; /*60%*/
   height: 85vh;
 
@@ -55,6 +55,16 @@
   box-shadow: 
     1px 1px 0 0 #000000, 
     inset 1px 1px 0 0 #dfdfdf; 
+}
+
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+
+  background-color: #ffffffef;
+  border: 1px solid black;
+  border-color: #808080 #ffffff #ffffff #808080;
+  box-shadow: inset 1px 1px 0 0 #000000;
 }
 
 .sidebar{
@@ -80,18 +90,22 @@
     1px 1px 0 0 #000000, 
     inset 1px 1px 0 0 #dfdfdf;
 
-  
+  box-sizing: border-box;
+
   /* 關閉連字功能 */
   font-variant-ligatures: none;
 }
 
 .sidebar .section {
   padding: 15px;
+  margin-right: 1px;
   
   background-color: #ffffffef;
   border: 1px solid black;
   border-color: #808080 #ffffff #ffffff #808080;
   box-shadow: inset 1px 1px 0 0 #000000;
+
+  box-sizing: border-box;
 }
 
 
@@ -119,6 +133,7 @@
 
   width: auto;
 
+  overflow-y: auto;
 }
 
 .settings-bar{
@@ -233,6 +248,11 @@
   font-size: 12px;
   cursor: pointer;
 
+}
+
+.game-controls button.result{
+  margin: 4%;
+  width: 90px;
 }
 
 .game-controls button:active{

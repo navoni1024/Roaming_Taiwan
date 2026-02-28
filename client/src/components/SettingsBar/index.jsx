@@ -1,5 +1,7 @@
-const SettingsBar = ({
+import { useState, useEffect } from "react";
 
+const SettingsBar = ({
+    gamePause, gameActive,
     gameMode, setGameMode,
     gameTime, setGameTime,
     questionsCount, setQuestionsCount,
@@ -49,20 +51,41 @@ const SettingsBar = ({
 
     }
 
+    //停止互動的效果說不定有更簡便寫法吧 但先這樣
+
+    const [overlayStyle, setOverlayStyle] = useState({})
+
+    useEffect (() => {
+        if(gamePause || gameActive){
+            setOverlayStyle({
+                filter: 'grayscale(1)',
+                opacity: 0.6,
+                pointerEvents: 'none',
+                userSelect: 'none'
+            })
+        }else{
+            setOverlayStyle({
+ 
+            })
+        }
+    }, [gamePause, gameActive])
+
+    //原本timeLimit叫"指定題數"來著 因為那時腦子卡住不知道該叫啥
+
     return(
-        <div className="section settings-bar">
+        <div className="section settings-bar" style={overlayStyle}>
             <ul>
                 <li>
                     <span>遊戲模式:</span>
                     <select id="gamemode-select" value={gameMode} onChange={handleGameModeChange}>
                         <option value="">請選擇模式^^</option>
                         <option value="timeLimit">限時答題</option>
-                        <option value="questionsComplete">指定題數</option>
+                        <option value="questionsComplete">計時答題</option> 
                     </select>
                 </li>  
                 <GameModeParameters/>
                 <li>
-                    <span>允許重複題目:</span>
+                    <span><del>允許重複題目:</del></span>
                     <button
                         className={acceptDuplicateQuestion ? 'game-controls active' : 'game-controls'}
                         onClick={() => {setAcceptDuplicateQuestion(!acceptDuplicateQuestion)}}

@@ -3,7 +3,7 @@
             return(
                 <>
                     <div>剩餘時間: <b>{timer}</b> 秒</div>
-                    <div className='score'>答題情況: <b>{correctAnswerCount}</b></div>
+                    <div className='score'>分數: <b>{correctAnswerCount}</b></div>
                 </>
             )
         }else if(gameMode === 'questionsComplete'){
