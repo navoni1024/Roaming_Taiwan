@@ -148,7 +148,6 @@ const RoamingTaiwan = () => {
 
                 }else if(timeLeft === 0){
                     setIsResult(true);
-                    setTimeLeft(gameTime);
                 }
             }
 
@@ -172,6 +171,11 @@ const RoamingTaiwan = () => {
     useEffect( () => {
         if(gameActive){
             if(isResult){
+                const updated = wrongHistory.map(item => item.TOWNID);
+                const cleanedWrongHistory = [...new Set(updated)]; //去除重複值 愛set
+
+                setWrongTownIdArray(cleanedWrongHistory);
+
                 setIsBingoWaiting(false);
                 //到結束畫面                
             }else{
@@ -208,9 +212,13 @@ const RoamingTaiwan = () => {
         setSelectedTownName('');
         setIsBingoWaiting(false);
         setGamePause(false);
-
+        setTimeLeft(gameTime);
         setCorrectHistory([]);
         setWrongHistory([]);
+
+        setCorrectTownIdArray([]);
+        setWrongTownIdArray([]);
+        showStatusRef.current = [{TOWNID: '', fillOpacity: 0, fillColor: 'rgb(255 ,255, 255)'}]
     }
 
     const timeLimitModeInit = () => {
@@ -220,6 +228,8 @@ const RoamingTaiwan = () => {
         setGameTime(0);
         setCorrectHistory([]);
         setWrongHistory([]);
+
+        setTimeLeft
     }
 
     const questionsCompleteModeInit = () => {
@@ -276,6 +286,7 @@ const RoamingTaiwan = () => {
                 setCorrectHistory( prev => [...prev,  answerRef.current]);
                 bingoAction();
             }else{
+                if(answerRef.current.TOWNID in wrongTownIdArray) return; 
                 setWrongHistory( prev => [...prev,  {'TOWNID': clickProperties.TOWNID, 'COUNTYNAME': clickProperties.COUNTYNAME, 'TOWNNAME': clickProperties.TOWNNAME}]);
             }
         }
@@ -415,22 +426,99 @@ const RoamingTaiwan = () => {
         status: 3 重複    
     */
 
-    /*
+    //先用ref做做看的statusStyle邏輯
+
     const [correctTownIdArray, setCorrectTownIdArray] = useState([]);
     const [wrongTownIdArray, setWrongTownIdArray]= useState([]);
+    const [updatedStatusArray, setUpdatedStatusArray] = useState([]);
+    const showStatusRef = useRef([])
 
     useEffect(() => {
-        const updated = correctHistory.map(item => item.TOWNID);
-        setCorrectTownIdArray(updated);
+        console.log('rendering processedStatusArray');
+        showStatusRef.current = updatedStatusArray;
+    }, [updatedStatusArray])
+
+    const showStatusStyle = (features) => {
+        const currentTownId = features.properties.TOWNID;
+        const foundState = showStatusRef.current.find(obj => obj.TOWNID === currentTownId);
+        if(foundState !== undefined){
+            return {
+                'fillOpacity': foundState.fillOpacity,
+                'fillColor': foundState.fillColor,
+                'weight': 0,
+                'opacity': 0,
+                'interactive': false
+            }
+        }else{
+            return {'fillOpacity': 0,'weight': 0, 'opacity': 0, 'interactive': false};
+        }
+    }
+
+    const updateShowStatusStyle = () => {
+        if(!gameActive){return null}; //暫時先這樣
+
+        const townIdStatusObj = {};
+
+        correctTownIdArray.forEach( (id) => {
+            townIdStatusObj[id] = 1;
+        });
+
+        wrongTownIdArray.forEach( (id) => {
+            if( townIdStatusObj[id] !== undefined){
+                townIdStatusObj[id] = townIdStatusObj[id] + 1;
+            }else{
+                townIdStatusObj[id] = 2;
+            }
+        })
+
+        let townIdStatusArray = Object.entries(townIdStatusObj);
+        let processedStatusArray = []
+
+        townIdStatusArray.forEach((status) => {
+            const townId = status[0];
+            const state = status[1];
+
+            switch(state){
+                    case 1:
+                        processedStatusArray.push({TOWNID: townId, fillOpacity: 0.5, fillColor: 'rgb(0 ,255, 0)'}) 
+                        break;
+                    case 2:
+                        processedStatusArray.push({TOWNID: townId, fillOpacity: 0.5, fillColor: 'rgb(255 ,0, 0)'})
+                        break;
+                    case 3:
+                        processedStatusArray.push({TOWNID: townId, fillOpacity: 0.5, fillColor: 'rgb(255 ,255, 0)'})
+                        break;
+            }
+        })
+
+        setUpdatedStatusArray(processedStatusArray);
+    }
+
+    //等畫面結束完的事件處理跑完wrongHistory才觸發
+    useEffect(() => {
+        if(showAnsweredArea || isResult){
+            updateShowStatusStyle();
+        }
+    }, [correctTownIdArray, wrongTownIdArray])
+
+
+    useEffect(() => {
+        if(gameActive){
+            const updated = correctHistory.map(item => item.TOWNID);
+            setCorrectTownIdArray(updated);
+        }
     },[correctHistory])
 
-    useEffect(() => {
-        const updated = wrongHistory.map(item => item.TOWNID);
-        setWrongTownIdArray(updated);
+    /*  
+    //整合到isResult理了
+    useEffect(() => {  
+        if(gameActive){
+            const updated = wrongHistory.map(item => item.TOWNID);
+            setWrongTownIdArray(updated);
+        }
     },[wrongHistory])
-
-    <GeoJSON style={{...showStatusStyle, weight: 0, opacity: 0, interactive: false}} data={mapdata} />
     */
+    
 
     //網頁結構---------------------------------------------------------------
 
@@ -440,6 +528,7 @@ const RoamingTaiwan = () => {
                 <MapContainer center={[23.6, 120.9738819]} zoom={7} minZoom={7} zoomDelta={0.5} zoomSnap={0.5} wheelPxPerZoomLevel={120} zoomAnimation={true} zoomAnimationThreshold={4} maxBounds={mapBound} preferCanvas={true}>
                     <GeoJSON style={mapStyle} data={mapdata} onEachFeature={mapFeature}></GeoJSON>
                     <GeoJSON style={countryBoundaryStyle} data={countryGeoJson} />
+                    <GeoJSON style={showStatusStyle} data={mapdata} />
                 </MapContainer>
             </div>
             <div className='sidebar'>
