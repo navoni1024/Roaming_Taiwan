@@ -264,7 +264,7 @@ const RoamingTaiwan = () => {
             const newQuestion = getRandomQuestion();
             setQuestionsList([newQuestion]);
 
-            if(correctHistory.length >= questionsCount){
+            if(correctHistory.length >= questionsCount-1){
                 setIsResult(true);
             }
             /* 之後allowDuplicate true再回來用這套
