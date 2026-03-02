@@ -92,7 +92,7 @@ const RoamingTaiwanMap = ({
                 const updated = wrongHistory.map(item => item.TOWNID);
                 const cleanedWrongHistory = [...new Set(updated)]; //去除重複值 愛set
                 playFinishSound();
-                setWrongTownIdArray(cleanedWrongHistory);
+                setWrongTownIdArray([...cleanedWrongHistory]);
                     
             }else{
                 setQuestionsBank(mapdata.features)
@@ -213,16 +213,6 @@ const RoamingTaiwanMap = ({
             setCorrectTownIdArray(updated);
         }
     },[correctHistory])
-
-    /*  
-    //整合到自己的isResult理了
-    useEffect(() => {  
-        if(gameActive){
-            const updated = wrongHistory.map(item => item.TOWNID);
-            setWrongTownIdArray(updated);
-        }
-    },[wrongHistory])
-    */
 
     //  顯示答題相關的地圖
 
