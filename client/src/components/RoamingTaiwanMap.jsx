@@ -41,7 +41,7 @@ const RoamingTaiwanMap = ({
         gamePauseRef.current = gamePause;
         isResultRef.current = isResult;
         isBingoWaitingRef.current = isBingoWaiting;
-    },[gameMode, gamePause, isResult, isBingoWaiting]);
+    },[gameActive, gameMode, gamePause, isResult, isBingoWaiting]);
 
     useEffect(() => {
         if(mapdata !== undefined){
@@ -170,7 +170,8 @@ const RoamingTaiwanMap = ({
             },
 
             click: (e) => {
-                playClickSound();
+                if (gamePauseRef.current || !gameActiveRef.current) return; 
+                //playClickSound();
                 setCurrentClickProperties(e);
             }
         });

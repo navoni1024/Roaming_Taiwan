@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const SettingsBar = ({
     gamePause, gameActive,
@@ -16,7 +16,28 @@ const SettingsBar = ({
         setGameMode(e.target.value); //e代表觸發事件標籤好像
     }
 
-    const GameModeParameters = () => {
+    const [localGameTime, setLocalGameTime] = useState(gameTime);
+    const inputGameTimeRef = useRef(null);
+    const handleGameTimeSubmit = () => {
+        setGameTime(Number(inputGameTimeRef.current.value));
+    }
+    useEffect(() => {
+        setLocalGameTime(gameTime);
+    }, [gameTime]);
+
+
+    const [localQuestionsCount, setLocalQuestionsCount] = useState(questionsCount);
+    const inputQuestionsRef = useRef(null);
+    const handleQuestionsCountSubmit = () => {
+        if (inputQuestionsRef.current) {
+            setQuestionsCount(Number(inputQuestionsRef.current.value));
+        }
+    }
+    useEffect(() => {
+        setLocalQuestionsCount(questionsCount);
+    }, [questionsCount]);
+
+    const gameModeParameters = () => {
         if(gameMode === ''){
             return(
             <>
@@ -26,25 +47,41 @@ const SettingsBar = ({
 
         if(gameMode === 'timeLimit'){
             return(
+                <>
                 <li >
                     <span id="game-time">遊戲時間:</span>
                     <span id="game-time-field">
-                        <input type="number" value={gameTime} onChange={(e) => {setGameTime(Number(e.target.value))}}></input>
-                        <span id="seconds"> 秒</span>
+                        <span id="seconds"> {localGameTime} 秒</span>
                     </span>
                 </li>
+                <li >
+                    <span id="game-time">更改時間:</span>
+                    <span id="game-time-field">
+                        <input type="number" ref={inputGameTimeRef}></input>
+                        <button onClick={handleGameTimeSubmit}>提交</button>
+                    </span>
+                </li>
+                </>
             )
         }
 
         if(gameMode === 'questionsComplete'){ //懶的改ID 可能有一天會改
             return(
+                <>
                 <li >
                     <span id="game-time">題目數量:</span>   
                     <span id="game-time-field">
-                        <input type="number" value={questionsCount} onChange={(e) => {setQuestionsCount(Number(e.target.value))}}></input>
-                        <span id="seconds"> 題</span>
+                        <span id="seconds">{localQuestionsCount} 題</span>
                     </span>
                 </li>
+                <li >
+                    <span id="game-time">更改數量:</span>   
+                    <span id="game-time-field">
+                        <input type="number" ref={inputQuestionsRef}></input>
+                        <button onClick={handleQuestionsCountSubmit}>提交</button>
+                    </span>
+                </li>
+                </>
             )
         }
 
@@ -83,7 +120,7 @@ const SettingsBar = ({
                         <option value="questionsComplete">答題計時</option> 
                     </select>
                 </li>  
-                <GameModeParameters/>
+                {gameModeParameters()}
                 <li>
                     <span><del>允許重複題目:</del></span>
                     <button

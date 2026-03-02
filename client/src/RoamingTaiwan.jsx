@@ -287,7 +287,7 @@ const RoamingTaiwan = () => {
                     setCorrectHistory( prev => [...prev,  answerRef.current]);
                     bingoAction();
                 }else{
-                    if(answerRef.current.TOWNID in wrongTownIdArray) return; 
+                    //if(answerRef.current.TOWNID in wrongTownIdArray) return; 先暫時再map端處理重複
                     setWrongHistory( prev => [...prev,  {'TOWNID': clickProperties.TOWNID, 'COUNTYNAME': clickProperties.COUNTYNAME, 'TOWNNAME': clickProperties.TOWNNAME}]);
                 }
             }
