@@ -219,7 +219,6 @@ const RoamingTaiwan = () => {
         const newQuestion = getRandomQuestion();
 
         setQuestionsList([newQuestion]);
-        setGameTime(0);
         setCorrectHistory([]);
         setWrongHistory([]);
 

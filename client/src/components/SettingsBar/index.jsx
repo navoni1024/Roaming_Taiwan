@@ -12,27 +12,63 @@ const SettingsBar = ({
     
     }) => {
 
+
+    const QUESTIONS_COMPLETE_MAX = 9999;
+    const QUESTIONS_COMPLETE_MIN = 1;
+    const TIME_LIMIT_MAX = 9999;
+    const TIME_LIMIT_MIN = 3;
+    const ACCEPT_DUPLICATE_QUESTION_UPPER_BOUND =  367; //這是0-367的意思 共368題 
+
     const handleGameModeChange = (e) => {
         setGameMode(e.target.value); //e代表觸發事件標籤好像
     }
 
     const [localGameTime, setLocalGameTime] = useState(gameTime);
     const inputGameTimeRef = useRef(null);
-    const handleGameTimeSubmit = () => {
-        setGameTime(Number(inputGameTimeRef.current.value));
-    }
+
     useEffect(() => {
         setLocalGameTime(gameTime);
     }, [gameTime]);
 
 
     const [localQuestionsCount, setLocalQuestionsCount] = useState(questionsCount);
+    const [outOfBoundaryWarning, setOutOfBoundaryWarning] = useState('');
     const inputQuestionsRef = useRef(null);
+    
+    useEffect( () => {
+        setOutOfBoundaryWarning('');
+    }, [gameMode, gameActive])
+
     const handleQuestionsCountSubmit = () => {
         if (inputQuestionsRef.current) {
-            setQuestionsCount(Number(inputQuestionsRef.current.value));
+            const inputValue = Number(inputQuestionsRef.current.value);
+
+            if(inputValue > QUESTIONS_COMPLETE_MAX || inputValue < QUESTIONS_COMPLETE_MIN){
+                setOutOfBoundaryWarning(`(${QUESTIONS_COMPLETE_MIN} ~ ${QUESTIONS_COMPLETE_MAX})`);
+                return;
+            }
+            
+            setQuestionsCount(inputValue);
+            setOutOfBoundaryWarning('');
         }
     }
+
+    const handleGameTimeSubmit = () => {
+        if (inputGameTimeRef.current) {
+            const inputValue = Number(inputGameTimeRef.current.value);
+
+            if((inputValue > TIME_LIMIT_MAX) || (inputValue < TIME_LIMIT_MIN)){
+                setOutOfBoundaryWarning(`(${TIME_LIMIT_MIN} ~ ${TIME_LIMIT_MAX})`);
+                return;
+            }
+            
+            setQuestionsCount(inputValue);
+            setOutOfBoundaryWarning('');
+        }
+        setGameTime(inputValue);
+    }
+
+
     useEffect(() => {
         setLocalQuestionsCount(questionsCount);
     }, [questionsCount]);
@@ -51,6 +87,7 @@ const SettingsBar = ({
                 <li >
                     <span id="game-time">遊戲時間:</span>
                     <span id="game-time-field">
+                        <span className="oob-warning">{outOfBoundaryWarning}</span>
                         <span id="seconds"> {localGameTime} 秒</span>
                     </span>
                 </li>
@@ -71,7 +108,8 @@ const SettingsBar = ({
                 <li >
                     <span id="game-time">題目數量:</span>   
                     <span id="game-time-field">
-                        <span id="seconds">{localQuestionsCount} 題</span>
+                        <span className="oob-warning">{outOfBoundaryWarning}</span>
+                        <span id="seconds"> {localQuestionsCount} 題</span>
                     </span>
                 </li>
                 <li >

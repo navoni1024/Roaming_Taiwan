@@ -18,8 +18,8 @@ const StatusBar = ({ isResult, gameActive, gameMode, questionTown, selectedTownN
                         <td style={{float: 'right'}}>{gameTime} 秒</td>
                     </tr>
                     <tr>
-                        <td>剩餘題目: </td>
-                        <td style={{float: 'right'}}>{questionsRemain}</td>
+                        <td>回答正確: </td>
+                        <td style={{float: 'right'}}>{correctAnswerCount}</td>
                     </tr>
                     
                 </>
@@ -84,8 +84,8 @@ const StatusBar = ({ isResult, gameActive, gameMode, questionTown, selectedTownN
                     <tbody>
                         <GameModeResult/>
                         <tr>
-                            <td>正確 / 錯誤:</td>
-                            <td style={{float: 'right'}}>{correctAnswerCount} / {wrongAnswerCount}</td>
+                            <td>正確 / 總數:</td>
+                            <td style={{float: 'right'}}>{correctAnswerCount} / {correctAnswerCount + wrongAnswerCount}</td>
                         </tr>
                         <tr>
                             <td>正確率:</td>
