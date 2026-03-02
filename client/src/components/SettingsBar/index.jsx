@@ -65,7 +65,6 @@ const SettingsBar = ({
             setGameTime(inputValue);
             setOutOfBoundaryWarning('');
         }
-        setGameTime(inputValue);
     }
 
 
