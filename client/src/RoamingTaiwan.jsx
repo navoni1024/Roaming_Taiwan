@@ -11,22 +11,14 @@ const DEBUG = true;
 
 const RoamingTaiwan = () => {
 
+    /*  這些現在還在settingBar那調
     const QUESTION_COMPLETE_COUNT_MAX = 368;
     const QUESTION_COMPLETE_COUNT_MIN = 3;
     const TIMELIMIT_TIME_MAX = 210;
     const TIMELIMIT_TIME_MIN = 5;
-
+    */
     const TIMER_DEFAULT = Number(65);
     const QUESTIONS_COUNT_DEFAULT = 3;
-    
-    /*
-    //原本的邏輯
-    const [isBingoWaiting, setIsBingoWaiting] = useState(0);
-    const [selectedTownName, setSelectedTownName] = useState();
-    const [randomQuetion, setRandomQuetion] = useState();
-    const [score, setScore] = useState(0);
-    const questionRef = useRef(randomQuetion);
-    */
    
     //遊戲狀態
     const [gameActive, setGameActive] = useState(false);
@@ -36,13 +28,26 @@ const RoamingTaiwan = () => {
 
     //設定
     const [gameMode, setGameMode] = useState('');                   // timeLimit questionsComplete
-    const [gameTime, setGameTime] = useState(100);                  // for timeLimit
+    const [gameTime, setGameTime] = useState(100);                  // for timeLimit 
     const [questionsCount, setQuestionsCount] = useState(QUESTIONS_COUNT_DEFAULT);     //questionsComplete題數(已棄用)
     const [acceptDuplicateQuestion, setAcceptDuplicateQuestion] = useState(false);
     const [showAnsweredArea, setShowAnsweredArea] = useState(true);
     const [showFullQuestion, setShowFullQuestion] = useState(true); //題目顯示縣市名 
     const [showCountryBoundary, setShowCountryBoundary] = useState(true); //總有一天會回來把他改成county的 吃了文化不足的虧:hakase:
     const [useTownId, setUseTownId] = useState(false); //如果false會使用TOWNNAME比對
+
+    // useTownID 暫時跟 showFullQuestion 綁定 
+
+    useEffect( () => {
+        setUseTownId(showFullQuestion)
+    }, [showFullQuestion]);
+
+    useEffect(() => {
+        if(!gameActive){
+            setTimeLeft(gameTime);
+        }
+    }, [gameTime]);
+
 
     //遊戲進行時的參數
 
@@ -75,7 +80,7 @@ const RoamingTaiwan = () => {
         answerRef.current = questionsList[0];
     }, [questionsList]);
 
-    // 視窗處理
+    // 視窗處理---------------------------------------------------------------
 
     const [overlayStyle, setOverlayStyle] = useState({})
 
@@ -95,7 +100,7 @@ const RoamingTaiwan = () => {
         }
     }, [gamePause])
     
-    // 遊戲邏輯---------------------------------------------------------------
+    // 遊戲功能---------------------------------------------------------------
 
     const getRandomQuestion = (prevQuestion={'TOWNID': '', 'COUNTYNAME': '', 'TOWNNAME':''}) =>{
         
@@ -126,17 +131,14 @@ const RoamingTaiwan = () => {
         return {'TOWNID': 'ERROR', 'COUNTYNAME': 'ERROR', 'TOWNNAME':'ERROR'}; //有空再回來改 先這樣 
     }
 
-    // useTownID 暫時跟 showFullQuestion 綁定 
+    /* TODO:
+    const getRandomQuestionArray = () => {
+        const keys = Object.keys(questionsBank);
 
-    useEffect( () => {
-        setUseTownId(showFullQuestion)
-    }, [showFullQuestion]);
 
-    useEffect(() => {
-        if(!gameActive){
-            setTimeLeft(gameTime);
-        }
-    }, [gameTime]);
+        
+    }
+    */
 
     //計時器
     useEffect(() => {
@@ -165,12 +167,16 @@ const RoamingTaiwan = () => {
         return () => clearInterval(timer);
     },[gameActive, timeLeft, gamePause])
 
+
+    // 遊戲狀態處理---------------------------------------------------------------
+
     /*
                 gameActive  isResult
         開始頁面    F           F           
         遊戲中      T           F           
         結束        T           T           
     */
+
 
     useEffect( () => {
         if(gameActive){
@@ -216,7 +222,7 @@ const RoamingTaiwan = () => {
     }
 
     const timeLimitModeInit = () => {
-        const newQuestion = getRandomQuestion();
+        const newQuestion = getRandomQuestion(questionsList[0]);
 
         setQuestionsList([newQuestion]);
         setCorrectHistory([]);
@@ -226,6 +232,8 @@ const RoamingTaiwan = () => {
     }
 
     const questionsCompleteModeInit = () => {
+
+        /*之後allowDuplicate true再回來用這套
         let newQuestionList = []
 
         for( let i = 0;i < questionsCount; i++ ){
@@ -234,6 +242,11 @@ const RoamingTaiwan = () => {
         }
 
         setQuestionsList([...newQuestionList])
+        */
+
+        const newQuestion = getRandomQuestion(questionsList[0]);
+        setQuestionsList([newQuestion])
+        
         setTimeLeft(0);
         setCorrectHistory([]);
         setWrongHistory([]);
@@ -247,6 +260,11 @@ const RoamingTaiwan = () => {
         }
 
         if(gameMode==='questionsComplete'){
+
+            const newQuestion = getRandomQuestion();
+            setQuestionsList([newQuestion]);
+
+            /* 之後allowDuplicate true再回來用這套
             setQuestionsList( (prev) => {
                 if( prev.length <= 1){
                     setIsResult(true);
@@ -255,8 +273,18 @@ const RoamingTaiwan = () => {
                     return prev.slice(1);
                 }
             })
+            */
         }
     };
+
+    useEffect( () => {
+        if(gameMode==='questionsComplete' && gameActive && !isResult){
+            if(correctHistory.length === questionsCount){
+                setIsResult(true);
+            }
+        }
+    }, [correctHistory])
+
 
     useEffect(() => {
         if(isBingoWaiting === true && gameActive === true){
@@ -264,9 +292,10 @@ const RoamingTaiwan = () => {
         }
     }, [questionsList])
 
-    //原本的judgeClick和useEffect都合在這了
+    //點擊處理 含 正解判定 原本的judgeClick和useEffect都合在這了---------------------------------------------------------------
 
     useEffect(() => {
+        console.log(currentClickProperties);
         if(currentClickProperties === undefined) return;
         const clickProperties = currentClickProperties.sourceTarget.feature.properties; 
 
@@ -291,6 +320,7 @@ const RoamingTaiwan = () => {
                 }
             }
         }
+
         if(showFullQuestion){
             setSelectedTownName(clickProperties.COUNTYNAME+' '+clickProperties.TOWNNAME);
         }else{
