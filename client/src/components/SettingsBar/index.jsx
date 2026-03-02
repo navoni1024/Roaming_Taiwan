@@ -94,7 +94,7 @@ const SettingsBar = ({
                 <li >
                     <span id="game-time">更改時間:</span>
                     <span id="game-time-field">
-                        <input type="number" ref={inputGameTimeRef}></input>
+                        <input className="settings-bar-input" type="number" ref={inputGameTimeRef}></input>
                         <button onClick={handleGameTimeSubmit}>提交</button>
                     </span>
                 </li>
@@ -115,7 +115,7 @@ const SettingsBar = ({
                 <li >
                     <span id="game-time">更改數量:</span>   
                     <span id="game-time-field">
-                        <input type="number" ref={inputQuestionsRef}></input>
+                        <input className="settings-bar-input" type="number" ref={inputQuestionsRef}></input>
                         <button onClick={handleQuestionsCountSubmit}>提交</button>
                     </span>
                 </li>

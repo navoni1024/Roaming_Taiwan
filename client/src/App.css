@@ -149,6 +149,20 @@
   overflow-y: auto;
 }
 
+.settings-bar-input{
+  margin-top: 5px;
+  width: 45px;
+  background-color: #ffffff;
+  font-family: 'MS Sans Serif', 'Tahoma', sans-serif;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.oob-warning{
+  color: red;
+  font-style: italic;
+}
+
 .settings-bar ul {
   list-style-type: square;
   padding: 8px;
@@ -212,12 +226,9 @@
 
 #game-time-field{
   float: right;
+  align-items: center;
+  justify-content: center;
 }
-
-.settings-bar input{
-  width: 60px;
-}
-
 
 .game-controls{
   height: 10%;
