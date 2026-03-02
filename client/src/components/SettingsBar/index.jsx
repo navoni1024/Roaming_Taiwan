@@ -62,7 +62,7 @@ const SettingsBar = ({
                 return;
             }
             
-            setQuestionsCount(inputValue);
+            setGameTime(inputValue);
             setOutOfBoundaryWarning('');
         }
         setGameTime(inputValue);
