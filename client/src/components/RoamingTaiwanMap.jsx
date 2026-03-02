@@ -5,6 +5,11 @@ import { GeoJSON } from 'react-leaflet/GeoJSON'
 import mapdata from "../geojson/TW_town_WGS84_precision_6_simplfy_35.json"
 import countryGeoJson from "../geojson/TW_county_WGS84_precision_6_simplfy_35.json"
 
+import useSound from "use-sound";
+import clickSound from "../assets/click.mp3"
+import finishSound from "../assets/windows-31-startup-sound.mp3"
+
+
 const RoamingTaiwanMap = ({
     gameActive, gamePause, isResult, gameMode, isBingoWaiting, 
     
@@ -14,8 +19,11 @@ const RoamingTaiwanMap = ({
     
     setCurrentClickProperties, setQuestionsBank, 
 }) => {
+    
+    //sound
 
-
+    const [playClickSound] = useSound(clickSound, {volume: 1.2});
+    const [playFinishSound] = useSound(finishSound, {volume: 0.6});
 
     //ref for leaflet
 
@@ -80,11 +88,12 @@ const RoamingTaiwanMap = ({
     useEffect( () => {
         if(gameActive){
             if(isResult){
+                //到結束畫面
                 const updated = wrongHistory.map(item => item.TOWNID);
                 const cleanedWrongHistory = [...new Set(updated)]; //去除重複值 愛set
-
+                playFinishSound();
                 setWrongTownIdArray(cleanedWrongHistory);
-                //到結束畫面                
+                    
             }else{
                 setQuestionsBank(mapdata.features)
                 //遊戲初始化
@@ -161,6 +170,7 @@ const RoamingTaiwanMap = ({
             },
 
             click: (e) => {
+                playClickSound();
                 setCurrentClickProperties(e);
             }
         });

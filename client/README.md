@@ -10,6 +10,10 @@ https://data.gov.tw/dataset/7441
 https://www.tgos.tw/MDE/MetaData/CRUD/ViewMetaData?GUID=1453e8f9-eb34-4533-9bcc-5762f043b40f&VIEW_TYPE=only&SOURCE=1
 
 Use QGIS to convert.
+Use mapsharper to edit.
+
+### 音效來源
+https://pixabay.com/sound-effects/search/old%20computer/
 
 # React + Vite
 
