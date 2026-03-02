@@ -2,15 +2,15 @@ import 'leaflet/dist/leaflet.css';
 import { useState , useEffect , useRef } from 'react';
 import { MapContainer } from 'react-leaflet/MapContainer'
 import { GeoJSON } from 'react-leaflet/GeoJSON'
-import mapdata from "../geojson/TW_town_WGS84_precision_6.json"
-import countryGeoJson from "../geojson/TW_country_WGS84_precision_6.json"
+import mapdata from "../geojson/TW_town_WGS84_precision_6_simplfy_35.json"
+import countryGeoJson from "../geojson/TW_county_WGS84_precision_6_simplfy_35.json"
 
 const RoamingTaiwanMap = ({
     gameActive, gamePause, isResult, gameMode, isBingoWaiting, 
     
     showFullQuestion, showCountryBoundary, showAnsweredArea,
     
-    questionsList, correctHistory, wrongHistory, 
+    correctHistory, wrongHistory, 
     
     setCurrentClickProperties, setQuestionsBank, 
 }) => {
@@ -24,9 +24,7 @@ const RoamingTaiwanMap = ({
     const isResultRef = useRef(isResult);
     const modeRef = useRef('');
     const isBingoWaitingRef = useRef(isBingoWaiting);
-
     const showFullQuestionRef = useRef(showFullQuestion);
-    
 
     useEffect(() => {
         modeRef.current = gameMode;

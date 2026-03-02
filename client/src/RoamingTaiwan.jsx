@@ -321,7 +321,6 @@ const RoamingTaiwan = () => {
                     showCountryBoundary={showCountryBoundary}
                     showAnsweredArea={showAnsweredArea}
 
-                    questionsList={questionsList}
                     correctHistory={correctHistory}
                     wrongHistory={wrongHistory}
 
