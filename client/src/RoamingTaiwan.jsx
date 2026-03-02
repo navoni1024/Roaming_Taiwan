@@ -264,6 +264,9 @@ const RoamingTaiwan = () => {
             const newQuestion = getRandomQuestion();
             setQuestionsList([newQuestion]);
 
+            if(correctHistory.length >= questionsCount){
+                setIsResult(true);
+            }
             /* 之後allowDuplicate true再回來用這套
             setQuestionsList( (prev) => {
                 if( prev.length <= 1){
@@ -276,15 +279,6 @@ const RoamingTaiwan = () => {
             */
         }
     };
-
-    useEffect( () => {
-        if(gameMode==='questionsComplete' && gameActive && !isResult){
-            if(correctHistory.length === questionsCount){
-                setIsResult(true);
-            }
-        }
-    }, [correctHistory])
-
 
     useEffect(() => {
         if(isBingoWaiting === true && gameActive === true){
