@@ -170,7 +170,6 @@ const RoamingTaiwanMap = ({
             },
 
             click: (e) => {
-                if (gamePauseRef.current || !gameActiveRef.current) return; 
                 //playClickSound();
                 setCurrentClickProperties(e);
             }
