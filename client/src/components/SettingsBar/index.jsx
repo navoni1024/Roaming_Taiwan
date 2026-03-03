@@ -17,7 +17,9 @@ const SettingsBar = ({
     const QUESTIONS_COMPLETE_MIN = 1;
     const TIME_LIMIT_MAX = 9999;
     const TIME_LIMIT_MIN = 3;
-    const ACCEPT_DUPLICATE_QUESTION_UPPER_BOUND =  367; //這是0-367的意思 共368題 
+    const ACCEPT_DUPLICATE_QUESTION_UPPER_BOUND =  368; 
+    const USE_TOWNNAME_UPPER_BOUND =  357;
+    const QUESTIONS_COUNT_DEFAULT = 3;
 
     const handleGameModeChange = (e) => {
         setGameMode(e.target.value); //e代表觸發事件標籤好像
@@ -37,9 +39,25 @@ const SettingsBar = ({
     
     useEffect( () => {
         setOutOfBoundaryWarning('');
-    }, [gameMode, gameActive])
+    }, [gameActive])
 
-    const handleQuestionsCountSubmit = () => {
+    useEffect( () => {
+        const inputValue = questionsCount;
+        if(gameMode === 'questionsComplete' && !acceptDuplicateQuestion){
+            //先用showFullQuestion判斷 之後要獨立出useTownID記得改
+            let upperBound = showFullQuestion ? ACCEPT_DUPLICATE_QUESTION_UPPER_BOUND : USE_TOWNNAME_UPPER_BOUND;
+            console.log(upperBound)
+            if(inputValue > upperBound){
+                setOutOfBoundaryWarning(showFullQuestion ? 
+                    `(${QUESTIONS_COMPLETE_MIN} ~ ${ACCEPT_DUPLICATE_QUESTION_UPPER_BOUND})`
+                    :`(${QUESTIONS_COMPLETE_MIN} ~ ${USE_TOWNNAME_UPPER_BOUND})`
+                );
+                setQuestionsCount(QUESTIONS_COUNT_DEFAULT);
+            }
+        }
+    },[showFullQuestion, acceptDuplicateQuestion])
+
+    const handleQuestionsCountSubmit = () => {  
         if (inputQuestionsRef.current) {
             const inputValue = Number(inputQuestionsRef.current.value);
 
@@ -47,6 +65,18 @@ const SettingsBar = ({
                 setOutOfBoundaryWarning(`(${QUESTIONS_COMPLETE_MIN} ~ ${QUESTIONS_COMPLETE_MAX})`);
                 return;
             }
+
+            if(gameMode === 'questionsComplete' && !acceptDuplicateQuestion){
+            //先用showFullQuestion判斷 之後要獨立出useTownID記得改
+            let upperBound = showFullQuestion ? ACCEPT_DUPLICATE_QUESTION_UPPER_BOUND : USE_TOWNNAME_UPPER_BOUND;   
+            if(inputValue > upperBound){
+                setOutOfBoundaryWarning(showFullQuestion ? 
+                    `(${QUESTIONS_COMPLETE_MIN} ~ ${ACCEPT_DUPLICATE_QUESTION_UPPER_BOUND})`
+                    :`(${QUESTIONS_COMPLETE_MIN} ~ ${USE_TOWNNAME_UPPER_BOUND})`
+                );
+                return;
+            }
+        }
             
             setQuestionsCount(inputValue);
             setOutOfBoundaryWarning('');
@@ -67,10 +97,11 @@ const SettingsBar = ({
         }
     }
 
-
+    /*
     useEffect(() => {
         setLocalQuestionsCount(questionsCount);
     }, [questionsCount]);
+    */
 
     const gameModeParameters = () => {
         if(gameMode === ''){
@@ -108,7 +139,7 @@ const SettingsBar = ({
                     <span id="game-time">題目數量:</span>   
                     <span id="game-time-field">
                         <span className="oob-warning">{outOfBoundaryWarning}</span>
-                        <span id="seconds"> {localQuestionsCount} 題</span>
+                        <span id="seconds"> {questionsCount} 題</span>
                     </span>
                 </li>
                 <li >
@@ -159,7 +190,7 @@ const SettingsBar = ({
                 </li>  
                 {gameModeParameters()}
                 <li>
-                    <span><del>允許重複題目:</del></span>
+                    <span>允許重複題目:</span>
                     <button
                         className={acceptDuplicateQuestion ? 'game-controls active' : 'game-controls'}
                         onClick={() => {setAcceptDuplicateQuestion(!acceptDuplicateQuestion)}}

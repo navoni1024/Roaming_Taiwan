@@ -25,6 +25,7 @@ const RoamingTaiwan = () => {
     const [gamePause, setGamePause] = useState(false);
     const [isResult, setIsResult] = useState(false);
     const [isBingoWaiting, setIsBingoWaiting] = useState(false);
+    //const [isLoading, setIsLoading] = useState(false);
 
     //設定
     const [gameMode, setGameMode] = useState('');                   // timeLimit questionsComplete
@@ -131,14 +132,63 @@ const RoamingTaiwan = () => {
         return {'TOWNID': 'ERROR', 'COUNTYNAME': 'ERROR', 'TOWNNAME':'ERROR'}; //有空再回來改 先這樣 
     }
 
-    /* TODO:
-    const getRandomQuestionArray = () => {
-        const keys = Object.keys(questionsBank);
 
-
-        
+    const shuffleArray = (array) => {
+        for(let i = array.length-1;i > 0;i--){
+            let j=Math.floor(Math.random()*(i+1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
     }
+
+    /*  如果不允許重複名子 用set存出現過的TownName 每次存進去前對一次 讚喔
+        考慮之後設成一張地圖初始化前會先跑upperbound值出來跟settingBar共用
+        或是先用useMem存濾過陣列
+
+        欸不過實測他跑好快 我懶了
+        然後濾TOWNID是357 總數是368
     */
+
+
+    const getRandomQuestionArray = () => {
+        let newQuestionList = [];
+
+        const keys = Object.keys(questionsBank);
+        if(useTownId){
+            keys.forEach((k) => {
+                const props = questionsBank[k].properties
+                let result = {
+                    'TOWNID': props.TOWNID,
+                    'COUNTYNAME': props.COUNTYNAME,
+                    'TOWNNAME': props.TOWNNAME
+                };
+                newQuestionList.push(result);
+            })
+        } else{
+            const townNameList = new Set();
+            keys.forEach((k) => {
+
+                const props = questionsBank[k].properties                
+                if(townNameList.has(props.TOWNNAME)){return;}
+
+                let result = {
+                    'TOWNID': props.TOWNID,
+                    'COUNTYNAME': props.COUNTYNAME,
+                    'TOWNNAME': props.TOWNNAME
+                };
+
+                townNameList.add(props.TOWNNAME)
+                newQuestionList.push(result);
+            })
+        }
+
+        console.log(newQuestionList.length);
+        shuffleArray(newQuestionList);
+
+        return newQuestionList;
+    }
+
+    
+
 
     //計時器
     useEffect(() => {
@@ -222,9 +272,13 @@ const RoamingTaiwan = () => {
     }
 
     const timeLimitModeInit = () => {
-        const newQuestion = getRandomQuestion(questionsList[0]);
-
-        setQuestionsList([newQuestion]);
+        if(!acceptDuplicateQuestion){
+            const newQuestionList = getRandomQuestionArray();
+            setQuestionsList(newQuestionList.slice(0, questionsCount));
+        }else{
+            const newQuestion = getRandomQuestion(questionsList[0]);
+            setQuestionsList([newQuestion]);
+        }
         setCorrectHistory([]);
         setWrongHistory([]);
 
@@ -232,20 +286,8 @@ const RoamingTaiwan = () => {
     }
 
     const questionsCompleteModeInit = () => {
-
-        /*之後allowDuplicate true再回來用這套
-        let newQuestionList = []
-
-        for( let i = 0;i < questionsCount; i++ ){
-            const newQuestion = getRandomQuestion();
-            newQuestionList.push(newQuestion);
-        }
-
-        setQuestionsList([...newQuestionList])
-        */
-
-        const newQuestion = getRandomQuestion(questionsList[0]);
-        setQuestionsList([newQuestion])
+        const newQuestionList = getRandomQuestionArray();
+        setQuestionsList(newQuestionList.slice(0, questionsCount)); //slice不包尾
         
         setTimeLeft(0);
         setCorrectHistory([]);
@@ -255,19 +297,23 @@ const RoamingTaiwan = () => {
     const bingoAction = () => {
 
         if(gameMode==='timeLimit'){
-            const newQuestion = getRandomQuestion();
-            setQuestionsList([newQuestion]);
+            if(acceptDuplicateQuestion){
+                setQuestionsList( (prev) => {
+                    if( prev.length <= 1){
+                        setIsResult(true);
+                        return prev;
+                    }else{
+                        return prev.slice(1);
+                    }
+                })
+            }else{
+                const newQuestion = getRandomQuestion();
+                setQuestionsList([newQuestion]);
+                return;
+            }
         }
 
         if(gameMode==='questionsComplete'){
-
-            const newQuestion = getRandomQuestion();
-            setQuestionsList([newQuestion]);
-
-            if(correctHistory.length >= questionsCount-1){
-                setIsResult(true);
-            }
-            /* 之後allowDuplicate true再回來用這套
             setQuestionsList( (prev) => {
                 if( prev.length <= 1){
                     setIsResult(true);
@@ -276,7 +322,6 @@ const RoamingTaiwan = () => {
                     return prev.slice(1);
                 }
             })
-            */
         }
     };
 
