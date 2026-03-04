@@ -1,5 +1,9 @@
 
-const GameControls = ({gameActive, isResult, gamePause, startOnClick, pauseOnClick, exitOnclick}) => {
+const GameControls = ({
+    gameActive, isResult, gamePause,
+    startOnClick, pauseOnClick, exitOnClick, shareOnClick
+    }) => {
+
     if(!gameActive){
         return(
             <div className="game-controls">
@@ -12,14 +16,14 @@ const GameControls = ({gameActive, isResult, gamePause, startOnClick, pauseOnCli
             return(
                 <div className="game-controls">
                     <button onClick={pauseOnClick}>{gamePause ? '繼續' : '暫停' }</button>    
-                    <button onClick={exitOnclick}>退出</button>
+                    <button onClick={exitOnClick}>退出</button>
                 </div>
             )
         }else{
             return(
                 <div className="game-controls">
-                    <button className="result" onClick={exitOnclick}>退至主畫面</button>
-                    <button className="result" onClick={exitOnclick}>分享至頻道</button>
+                    <button className="result" onClick={exitOnClick}>退至主畫面</button>
+                    <button className="result" onClick={shareOnClick}>分享至頻道</button>
                 </div>
             )
         }

@@ -135,7 +135,7 @@ const RoamingTaiwan = () => {
 
     const shuffleArray = (array) => {
         for(let i = array.length-1;i > 0;i--){
-            let j=Math.floor(Math.random()*(i+1));
+            let j=Math.floor(Math.random()*(i+1)); //i+1允許元素留在原位 可以增加隨機性好像
             [array[i], array[j]] = [array[j], array[i]];
         }
     }
@@ -370,7 +370,11 @@ const RoamingTaiwan = () => {
 
     //地圖相關---------------------------------------------------------------
 
-    
+    const handleShare = () => {
+        setGameActive(false);
+        setIsResult(false);
+    }
+
     
 
     //網頁結構---------------------------------------------------------------
@@ -438,10 +442,11 @@ const RoamingTaiwan = () => {
                         if(gameMode!==''){setGameActive((prev) => !prev)}
                     }}
                     pauseOnClick={() => {setGamePause((prev) => !prev)}}
-                    exitOnclick={() => {
+                    exitOnClick={() => {
                         setGameActive(false);
                         setIsResult(false);
                     }}
+                    shareOnClick={handleShare}
                 />
 
             </div>
